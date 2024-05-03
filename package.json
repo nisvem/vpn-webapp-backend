@@ -17,9 +17,7 @@
     "express-validator": "^7.0.1",
     "mongodb": "^6.5.0",
     "mongoose": "^8.3.2",
-    "outlinevpn-api": "^2.3.0"
-  },
-  "devDependencies": {
+    "outlinevpn-api": "^2.3.0",
     "nodemon": "^3.1.0"
   }
 }
