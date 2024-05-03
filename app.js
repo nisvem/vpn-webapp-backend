@@ -27,7 +27,7 @@ const start = async () => {
   try {
     await mongoose.connect(process.env.MODGO_URL, { dbName: 'vpn' });
 
-    localServer.listen(process.env.PORT, () => {
+    app.listen(process.env.PORT, () => {
       console.log('Server started!');
     });
   } catch (error) {
