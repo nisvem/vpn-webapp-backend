@@ -90,17 +90,17 @@ app.get('/api/getUser/:id', async (req, res) => {
   }
 });
 
-app.post('/api/createUser', checkAccess, async (req, res) => {
+app.post('/api/createUser', async (req, res) => {
   try {
+    const telegramId = req.body.telegramId;
+
     const data = req.body,
       user = new User({
         _id: new mongoose.Types.ObjectId(),
         username: data.username + '',
-        telegramId: data.telegramId,
-
+        telegramId: telegramId,
         name: data.name + '',
         surname: data.surname + '',
-        phone: data.phone + '',
       });
 
     await user.save();
