@@ -13,6 +13,11 @@ const user = new Schema({
   surname: { type: String, required: false },
   phone: { type: String, required: false },
 
+  lastViewedApp: { type: Date, required: false },
+  dateOfCreateUser: { type: Date, required: false },
+
+  avatar: { type: String, required: false },
+
   keys: [{ type: Schema.Types.ObjectId, ref: 'key' }],
 });
 

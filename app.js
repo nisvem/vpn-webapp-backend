@@ -12,11 +12,24 @@ import Server from './models/server.js';
 
 import { OutlineVPN } from 'outlinevpn-api';
 
+// config({ path: `.env.local` });
+
 config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  const key = req.headers['x-access-code'];
+
+  if (key && key === process.env.ACCESS_KEY) {
+    next();
+  } else {
+    res.status(403).json({
+      error: 'Access is denied!',
+    });
+  }
+});
 
 const localServer = https.createServer(
   { key: fs.readFileSync('./key.pem'), cert: fs.readFileSync('./cert.pem') },
@@ -38,7 +51,7 @@ const start = async () => {
 
 const checkAccessAdmin = async (req, res, next) => {
   const telegramId = req.headers['x-telegram-id'];
-  const user = await User.findOne({ telegramId: telegramId });
+  const user = await User.findOne({ telegramId: telegramId }, 'isAdmin');
 
   if (user.isAdmin) {
     next();
@@ -63,9 +76,12 @@ const checkAccess = async (req, res, next) => {
 
 const checkLimitedToCreate = async (req, res, next) => {
   try {
-    const user = await User.findOne({
-      telegramId: req.headers['x-telegram-id'],
-    });
+    const user = await User.findOne(
+      {
+        telegramId: req.headers['x-telegram-id'],
+      },
+      'isLimitedToCreate'
+    );
 
     if (!user.isLimitedToCreate) {
       next();
@@ -83,7 +99,10 @@ const checkLimitedToCreate = async (req, res, next) => {
 
 app.get('/api/getUser/:id', async (req, res) => {
   try {
-    const user = await User.findOne({ telegramId: req.params.id });
+    const user = await User.findOne(
+      { telegramId: req.params.id },
+      'telegramId name username surname photo keys isAdmin isLimitedToCreate maxKeyAvalible'
+    );
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -101,9 +120,38 @@ app.post('/api/createUser', async (req, res) => {
         telegramId: telegramId,
         name: data.name + '',
         surname: data.surname + '',
+        avatar: data.photoUrl + '',
+        dateOfCreateUser: new Date(),
+        lastViewedApp: new Date(),
       });
 
     await user.save();
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/updateUser', async (req, res) => {
+  try {
+    const data = req.body;
+
+    await User.updateOne(
+      { telegramId: data.telegramId },
+      {
+        username: data.username + '',
+        name: data.name + '',
+        surname: data.surname + '',
+        avatar: data.photoUrl + '',
+        lastViewedApp: new Date(),
+      }
+    );
+
+    const user = await User.findOne(
+      { telegramId: data.telegramId },
+      'telegramId name username surname keys isAdmin isLimitedToCreate maxKeyAvalible'
+    );
 
     res.json(user);
   } catch (error) {
