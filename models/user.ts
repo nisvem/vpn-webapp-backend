@@ -1,7 +1,7 @@
-import { MaxKey } from 'mongodb';
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
+import { IKey } from './key';
 
-const user = new Schema({
+const user: Schema = new Schema({
   username: { type: String, required: true },
   telegramId: { type: String, required: true, unique: true },
 
@@ -11,14 +11,29 @@ const user = new Schema({
 
   name: { type: String, required: false },
   surname: { type: String, required: false },
-  phone: { type: String, required: false },
 
   lastViewedApp: { type: Date, required: false },
   dateOfCreateUser: { type: Date, required: false },
 
-  avatar: { type: String, required: false },
-
   keys: [{ type: Schema.Types.ObjectId, ref: 'key' }],
 });
 
-export default model('user', user);
+export interface IUser {
+  _id: Types.ObjectId;
+  username: string;
+  telegramId: string;
+
+  isAdmin: boolean;
+  isLimitedToCreate: boolean;
+  maxKeyAvalible: number;
+
+  name: string;
+  surname: string;
+
+  lastViewedApp: Date;
+  dateOfCreateUser: Date;
+
+  keys: IKey[];
+}
+
+export default model<IUser>('user', user);

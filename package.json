@@ -2,22 +2,32 @@
   "name": "vpn_backend",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "app.ts",
   "type": "module",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@a2seven/yoo-checkout": "^1.1.4",
+    "axios": "^1.6.8",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "date-and-time": "^3.1.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-validator": "^7.0.1",
+    "grammy": "^1.22.4",
     "mongodb": "^6.5.0",
     "mongoose": "^8.3.2",
-    "outlinevpn-api": "^2.3.0",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "outlinevpn-api": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "tsx": "^4.9.3",
+    "typescript": "^5.4.5"
   }
 }
