@@ -9,9 +9,9 @@ import { bot } from './bot';
 
 import apiHandlers from './apiHandlers';
 
-config({ path: `.env.local` });
+// config({ path: `.env.local` });
 
-// config();
+config();
 
 const app = express();
 
@@ -29,16 +29,16 @@ app.use((req, res, next) => {
   }
 });
 
-const localServer = https.createServer(
-  { key: fs.readFileSync('./key.pem'), cert: fs.readFileSync('./cert.pem') },
-  app
-);
+// const localServer = https.createServer(
+//   { key: fs.readFileSync('./key.pem'), cert: fs.readFileSync('./cert.pem') },
+//   app
+// );
 
 const start = async () => {
   try {
     await mongoose.connect(process.env.MODGO_URL as string, { dbName: 'vpn' });
 
-    localServer.listen(process.env.PORT, () => {
+    app.listen(process.env.PORT, () => {
       console.log('Server started!');
     });
   } catch (error: any) {
