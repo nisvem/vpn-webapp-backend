@@ -26,7 +26,7 @@ export async function createPayment(id: string, telegramId: string) {
       id_key: id,
       telegramId: telegramId,
     },
-    test: true,
+    capture: true,
   };
 
   try {
