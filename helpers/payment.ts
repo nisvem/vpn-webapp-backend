@@ -1,16 +1,45 @@
-import axios from 'axios';
-import { createHash } from 'crypto';
+import { config } from 'dotenv';
+import { YooCheckout, ICreatePayment } from '@a2seven/yoo-checkout';
+import { v4 as uuidv4 } from 'uuid';
 
-const payment = axios.create();
+// config({ path: `.env.local` });
+config();
 
-payment.defaults.baseURL = process.env.API_PAYMENT_URL;
+const YooKassa = new YooCheckout({
+  shopId: `${process.env.SHOP_ID_YOOKASSA}`,
+  secretKey: `${process.env.SECRET_KEY_YOOKASSA}`,
+});
 
-payment.defaults.headers.common['Content-Type'] =
-  'application/x-www-form-urlencoded';
-payment.defaults.headers.common['Origin'] = 'https://test-shop.ru';
-payment.defaults.headers.common['Referer'] = 'test-shop.ru';
+export async function createPayment(id: string, telegramId: string) {
+  const idempotence_key = uuidv4();
+  const createPayload: ICreatePayment = {
+    amount: {
+      value: '10.00',
+      currency: 'RUB',
+    },
+    description: 'Оплата ключа на месяц',
+    confirmation: {
+      type: 'redirect',
+      return_url: 'https://t.me/test_for_develop_nisvem_bot',
+    },
+    metadata: {
+      id_key: id,
+      telegramId: telegramId,
+    },
+    test: true,
+  };
 
-export async function createPayment(id: string) {
+  try {
+    const payment = await YooKassa.createPayment(
+      createPayload,
+      idempotence_key
+    );
+    console.log(payment);
+    return payment.confirmation.confirmation_url;
+  } catch (error) {
+    console.error(error);
+  }
+
   // const response = await payment.post('/init', {
   //   order_id: id,
   //   amount: 100,

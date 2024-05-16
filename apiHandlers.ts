@@ -6,9 +6,10 @@ import {
   checkLimitedToCreate,
   checkAccess,
   checkAccessAdmin,
+  disableKey,
+  enableKey,
 } from './helpers/helpers.js';
 import { bot } from './bot';
-import { YooCheckout } from '@a2seven/yoo-checkout';
 
 import date from 'date-and-time';
 
@@ -180,19 +181,7 @@ router.get('/getDataUsage/:id', checkAccess, async (req, res) => {
 
 router.post('/disableKey', checkAccessAdmin, async (req, res) => {
   try {
-    const key = await Key.findById(req.body.id).populate('user server').exec();
-
-    if (!key) throw new Error("The key doesn't exist.");
-
-    const outlinevpn = new OutlineVPN({
-      apiUrl: key.server.URL,
-      fingerprint: key.server.FINGERPRINT,
-    });
-
-    await outlinevpn.disableUser(key.id);
-    key.isOpen = false;
-
-    await key.save();
+    const key = await disableKey(req.body.id);
 
     res.json(key);
   } catch (error: any) {
@@ -202,19 +191,7 @@ router.post('/disableKey', checkAccessAdmin, async (req, res) => {
 
 router.post('/enableKey', checkAccessAdmin, async (req, res) => {
   try {
-    const key = await Key.findById(req.body.id).populate('user server').exec();
-
-    if (!key) throw new Error("The key doesn't exist.");
-
-    const outlinevpn = new OutlineVPN({
-      apiUrl: key.server.URL,
-      fingerprint: key.server.FINGERPRINT,
-    });
-
-    await outlinevpn.enableUser(key.id);
-    key.isOpen = true;
-
-    await key.save();
+    const key = await enableKey(req.body.id);
 
     res.json(key);
   } catch (error: any) {
@@ -405,8 +382,8 @@ router.post('/getUrlToChat', checkAccess, async (req, res) => {
 
     if (!key) throw new Error("The key doesn't exist.");
 
-    await createPayment(req.body.idKey);
-    await bot.api.sendMessage(telegramId, req.body.idKey);
+    const url = await createPayment(req.body.idKey, telegramId);
+    await bot.api.sendMessage(telegramId, url || 'Ошибка');
 
     res.status(200).json();
   } catch (error: any) {
@@ -415,19 +392,18 @@ router.post('/getUrlToChat', checkAccess, async (req, res) => {
 });
 
 router.post('/callbackPayment', async (req, res) => {
-  // const checkout = new YooCheckout({ shopId: 'your_shopId', secretKey: 'your_secretKey' });
-
-  // try {
-  //   const payment = await checkout.getPayment(paymentId);
-  //   console.log(payment)
-  // } catch (error) {
-  //    console.error(error);
-  // }
+  console.log(req);
 
   try {
-    console.log(req);
+    await bot.api.sendMessage(req.metadata.telegramId, 'Ключ активирован!');
+    await enableKey(req.metadata.id_key);
+
     res.status(200).json();
   } catch (error: any) {
+    await bot.api.sendMessage(
+      req.metadata.telegramId,
+      'Something wrong! Text me @nisvem for fix it!'
+    );
     res.status(500).json({ error: error.message });
   }
 });

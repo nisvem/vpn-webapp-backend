@@ -1,6 +1,9 @@
+import { config } from 'dotenv';
 import { Bot, InlineKeyboard } from 'grammy';
 
-export const bot = new Bot('6881075844:AAHRv5Bl8uPsu0p4mr3kkeMEoiNddMikGN4');
+config({ path: `.env.local` });
+
+export const bot = new Bot(process.env.BOT_TOKEN + '');
 
 const keyboard = new InlineKeyboard()
   .webApp('webapp', 'https://127.0.0.1:8080')

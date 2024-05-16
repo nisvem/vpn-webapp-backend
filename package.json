@@ -24,7 +24,8 @@
     "nodemon": "^3.1.0",
     "outlinevpn-api": "^2.3.0",
     "tsx": "^4.10.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

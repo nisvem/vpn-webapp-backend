@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { OutlineVPN } from 'outlinevpn-api';
 
 import User, { IUser } from '../models/user';
-import { IKey } from '../models/key';
+import Key, { IKey } from '../models/key';
 import { IServer } from '../models/server';
 import { HydratedDocument } from 'mongoose';
 
@@ -93,4 +93,40 @@ export async function checkOpenToRegister(
 
   await user.save();
   await server.save();
+}
+
+export async function disableKey(id: string) {
+  const key = await Key.findById(id).populate('user server').exec();
+
+  if (!key) throw new Error("The key doesn't exist.");
+
+  const outlinevpn = new OutlineVPN({
+    apiUrl: key.server.URL,
+    fingerprint: key.server.FINGERPRINT,
+  });
+
+  await outlinevpn.disableUser(key.id);
+  key.isOpen = false;
+
+  await key.save();
+
+  return key;
+}
+
+export async function enableKey(id: string) {
+  const key = await Key.findById(id).populate('user server').exec();
+
+  if (!key) throw new Error("The key doesn't exist.");
+
+  const outlinevpn = new OutlineVPN({
+    apiUrl: key.server.URL,
+    fingerprint: key.server.FINGERPRINT,
+  });
+
+  await outlinevpn.enableUser(key.id);
+  key.isOpen = true;
+
+  await key.save();
+
+  return key;
 }
