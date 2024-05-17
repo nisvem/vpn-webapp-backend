@@ -8,6 +8,7 @@ import cors from 'cors';
 import { bot } from './bot';
 import apiHandlersApp from './apiHandlersApp';
 import apiHandlersPayment from './apiHandlersPayment';
+import startCron from './helpers/crons';
 
 // config({ path: `.env.local` });
 
@@ -34,8 +35,8 @@ const start = async () => {
     app.listen(process.env.PORT || 3000, () => {
       console.log(`App server started on port ${process.env.PORT}`);
     });
-
     bot.start();
+    await startCron();
   } catch (error: any) {
     console.log('Something went wrong!', error.message);
     process.exit(1);

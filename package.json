@@ -14,6 +14,7 @@
     "axios": "^1.6.8",
     "cors": "^2.8.5",
     "country-flag-icons": "^1.5.11",
+    "cron": "^3.1.7",
     "crypto": "^1.0.1",
     "date-and-time": "^3.1.1",
     "dotenv": "^16.4.5",

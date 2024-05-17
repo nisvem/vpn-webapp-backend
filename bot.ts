@@ -24,7 +24,6 @@ bot.command('start', (ctx) =>
       parse_mode: 'HTML',
       reply_markup: {
         ...keyboard,
-        remove_keyboard: true,
       },
     }
   )
