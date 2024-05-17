@@ -39,38 +39,4 @@ export async function createPayment(id: string, telegramId: string) {
   } catch (error) {
     console.error(error);
   }
-
-  // const response = await payment.post('/init', {
-  //   order_id: id,
-  //   amount: 100,
-  //   info: [
-  //     {
-  //       name: 'Тест',
-  //       quantity: 1,
-  //       amount: 100,
-  //     },
-  //   ],
-  //   signature: createHash('sha256')
-  //     .update(`${id}100Тест1100${process.env.API_PAYMENT_KEY}`)
-  //     .digest('hex'),
-  // });
-  // await new Promise((resolve) =>
-  //   setTimeout(() => {
-  //     resolve('');
-  //   }, 5000)
-  // );
-  // console.log({
-  //   order_id: id,
-  //   amount: 100,
-  //   info: [
-  //     {
-  //       name: 'Тест',
-  //       quantity: 1,
-  //       amount: 100,
-  //     },
-  //   ],
-  //   signature: createHash('sha256')
-  //     .update(`${id}100Тест1100${process.env.API_PAYMENT_KEY}`)
-  //     .digest('hex'),
-  // });
 }
