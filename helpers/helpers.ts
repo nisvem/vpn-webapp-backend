@@ -17,9 +17,7 @@ type Middleware = (
 
 export const checkAccessApp: Middleware = async (req, res, next) => {
   const key = req.headers['x-access-code'];
-  console.log('Request access ...');
   if (key && key === process.env.ACCESS_KEY) {
-    console.log('Done!');
     next();
   } else {
     console.log('Access is denied!');
