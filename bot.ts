@@ -1,18 +1,33 @@
 import { config } from 'dotenv';
 import { Bot, InlineKeyboard } from 'grammy';
 
-config({ path: `.env.local` });
+// config({ path: `.env.local` });
+config();
 
 export const bot = new Bot(process.env.BOT_TOKEN + '');
 
-const keyboard = new InlineKeyboard()
-  .webApp('webapp', 'https://127.0.0.1:8080')
-  .row();
+const keyboard = new InlineKeyboard([
+  [
+    {
+      text: '🔑 Keys',
+      web_app: {
+        url: process.env.URL_WEBAPP || '',
+      },
+    },
+  ],
+]);
 
 bot.command('start', (ctx) =>
-  ctx.reply('Welcome! Up and running.', {
-    reply_markup: keyboard,
-  })
+  ctx.reply(
+    `Hi!👋 \n\nTo get started and receive your server key or manage these please click on the menu on the sidebar 🔑, or click here to access the web app 👇`,
+    {
+      parse_mode: 'HTML',
+      reply_markup: {
+        ...keyboard,
+        remove_keyboard: true,
+      },
+    }
+  )
 );
 
 bot.on('message', async (ctx) => {

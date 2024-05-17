@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { OutlineVPN } from 'outlinevpn-api';
-
+import { bot } from '../bot';
 import User, { IUser } from '../models/user';
 import Key, { IKey } from '../models/key';
 import { IServer } from '../models/server';
 import { HydratedDocument } from 'mongoose';
+import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 
 type Middleware = (
   req: Request,
@@ -12,7 +13,7 @@ type Middleware = (
   next: NextFunction
 ) => Promise<void>;
 
-export const checkaAccessApp: Middleware = async (req, res, next) => {
+export const checkAccessApp: Middleware = async (req, res, next) => {
   const key = req.headers['x-access-code'];
   console.log('Request access ...');
   if (key && key === process.env.ACCESS_KEY) {
@@ -117,6 +118,21 @@ export async function disableKey(id: string) {
     apiUrl: key.server.URL,
     fingerprint: key.server.FINGERPRINT,
   });
+  try {
+    await bot.api.sendMessage(
+      key.user.telegramId,
+      `Your key <b>"${key.name}"</b> 🗝️ for server <b>"${key.server.name} (${
+        key.server.country
+      } ${getUnicodeFlagIcon(
+        key.server.abbreviatedCountry
+      )})"</b> has been deactivated ⛔️.`,
+      {
+        parse_mode: 'HTML',
+      }
+    );
+  } catch (e) {
+    console.log(e);
+  }
 
   await outlinevpn.disableUser(key.id);
   key.isOpen = false;
@@ -135,6 +151,22 @@ export async function enableKey(id: string) {
     apiUrl: key.server.URL,
     fingerprint: key.server.FINGERPRINT,
   });
+
+  try {
+    await bot.api.sendMessage(
+      key.user.telegramId,
+      `Your key <b>"${key.name}"</b> 🗝️ for server <b>"${key.server.name} (${
+        key.server.country
+      } ${getUnicodeFlagIcon(
+        key.server.abbreviatedCountry
+      )})"</b> has been activated ✅.`,
+      {
+        parse_mode: 'HTML',
+      }
+    );
+  } catch (e) {
+    console.log(e);
+  }
 
   await outlinevpn.enableUser(key.id);
   key.isOpen = true;

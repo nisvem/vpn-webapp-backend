@@ -21,6 +21,7 @@ export interface IKey {
   id: string;
   name: string;
   accessUrl: string;
+  currentPrice: number;
 
   isOpen: boolean;
   user: IUser;

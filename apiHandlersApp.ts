@@ -8,21 +8,33 @@ import {
   checkAccessAdmin,
   disableKey,
   enableKey,
-  checkaAccessApp,
+  checkAccessApp,
 } from './helpers/helpers.js';
 import { bot } from './bot.js';
+import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 
 import date from 'date-and-time';
 
-import User, { IUser } from './models/user.js';
-import Key, { IKey } from './models/key.js';
-import Server, { IServer } from './models/server.js';
+import User, { IUser } from './models/user';
+import Key, { IKey } from './models/key';
+import Server, { IServer } from './models/server';
+import Tariff, { ITariff } from './models/tariff';
 import mongoose, { Error } from 'mongoose';
-import { createPayment } from './helpers/payment.js';
+import { createPayment } from './helpers/payment';
 
 const routerApp = Router();
-routerApp.use(checkaAccessApp);
+routerApp.use(checkAccessApp);
 //  GET
+
+routerApp.get('/getTariffs', checkAccess, async (req, res) => {
+  try {
+    const tariffs = await Tariff.find();
+    res.json(tariffs);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 routerApp.get('/getUsers', checkAccessAdmin, async (req, res) => {
   try {
     const users = await User.find();
@@ -328,7 +340,7 @@ routerApp.post(
         isOpen: false,
         server: server._id,
         currentPrice: server.price,
-        nextPayment: date.addMonths(new Date(), 1),
+        nextPayment: new Date(),
       });
 
       user.keys.push(key);
@@ -376,19 +388,62 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
   }
 });
 
-routerApp.post('/getUrlToChat', checkAccess, async (req, res) => {
+routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
+  const telegramId = req.body.telegramId;
+  const keyId = req.body.keyId;
+  const tariffId = req.body.tariffId;
+
   try {
-    const telegramId = req.body.telegramId;
-    const keyId = req.body.keyId;
     const key = await Key.findById(keyId).populate('server').exec();
+    const tariff = await Tariff.findById(tariffId).exec();
 
     if (!key) throw new Error("The key doesn't exist.");
+    if (!tariff) throw new Error("The tariff doesn't exist.");
 
-    const url = await createPayment(keyId, telegramId);
-    await bot.api.sendMessage(telegramId, url || 'Ошибка');
+    const total = !tariff.discountPercentage
+      ? ((key.currentPrice * tariff.days) / 30).toFixed(2)
+      : (
+          (((key.currentPrice * tariff.days) / 30) *
+            tariff.discountPercentage) /
+          100
+        ).toFixed(2);
+
+    const url = await createPayment(telegramId, key, tariff, total);
+
+    if (url)
+      await bot.api.sendMessage(
+        telegramId,
+        `<b>Key name</b>: ${key.name}\n<b>Server</b>: ${key.server.name} (${
+          key.server.country
+        } ${getUnicodeFlagIcon(
+          key.server.abbreviatedCountry
+        )})\n<b>Payment period</b>: ${
+          tariff.days
+        } days\n<b>Next payment</b>:${date.format(
+          date.addDays(new Date(), Number(tariff.days)),
+          'D MMMM YYYY'
+        )}\n<b>Amount</b>: ${total} rub.\n\nTo make a payment, please use the following link 👇`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'Pay',
+                  url: url,
+                },
+              ],
+            ],
+          },
+          parse_mode: 'HTML',
+        }
+      );
 
     res.status(200).json();
   } catch (error: any) {
+    await bot.api.sendMessage(
+      telegramId,
+      'Something went wrong! Text me @nisvem for fix it!'
+    );
     res.status(500).json({ error: error.message });
   }
 });

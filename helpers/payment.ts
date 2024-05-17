@@ -1,6 +1,8 @@
 import { config } from 'dotenv';
 import { YooCheckout, ICreatePayment } from '@a2seven/yoo-checkout';
 import { v4 as uuidv4 } from 'uuid';
+import { IKey } from '../models/key';
+import { ITariff } from '../models/tariff';
 
 // config({ path: `.env.local` });
 config();
@@ -10,23 +12,29 @@ const YooKassa = new YooCheckout({
   secretKey: `${process.env.SECRET_KEY_YOOKASSA}`,
 });
 
-export async function createPayment(id: string, telegramId: string) {
+export async function createPayment(
+  telegramId: string,
+  key: IKey,
+  tariff: ITariff,
+  total: string
+) {
   const idempotence_key = uuidv4();
   const createPayload: ICreatePayment = {
     amount: {
-      value: '10.00',
+      value: total,
       currency: 'RUB',
     },
-    description: 'Оплата ключа на месяц',
+    description: `Оплата ключа для сервера "${key.server.name}" на ${tariff.days} дней (${telegramId})`,
     confirmation: {
       type: 'redirect',
       return_url: 'https://t.me/test_for_develop_nisvem_bot',
     },
     metadata: {
-      id_key: id,
+      keyId: key._id,
+      days: tariff.days,
       telegramId: telegramId,
     },
-    // capture: true,
+    capture: true,
   };
 
   try {
