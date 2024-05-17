@@ -27,7 +27,7 @@ export async function createPayment(
     description: `Оплата ключа для сервера "${key.server.name}" на ${tariff.days} дней (${telegramId})`,
     confirmation: {
       type: 'redirect',
-      return_url: 'https://t.me/test_for_develop_nisvem_bot',
+      return_url: process.env.URL_RETURN_PAYMENT,
     },
     metadata: {
       keyId: key._id,
