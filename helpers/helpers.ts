@@ -12,6 +12,19 @@ type Middleware = (
   next: NextFunction
 ) => Promise<void>;
 
+export const checkaAccessApp: Middleware = async (req, res, next) => {
+  const key = req.headers['x-access-code'];
+  console.log('Request access ...');
+  if (key && key === process.env.ACCESS_KEY) {
+    console.log('Done!');
+    next();
+  } else {
+    console.log('Access is denied!');
+    res.status(403).json({
+      error: 'Access is denied!',
+    });
+  }
+};
 export const checkAccessAdmin: Middleware = async (req, res, next) => {
   const telegramId = req.headers['x-telegram-id'];
   const user = await User.findOne({ telegramId: telegramId }, 'isAdmin');

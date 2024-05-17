@@ -8,6 +8,7 @@ import {
   checkAccessAdmin,
   disableKey,
   enableKey,
+  checkaAccessApp,
 } from './helpers/helpers.js';
 import { bot } from './bot.js';
 
@@ -20,7 +21,7 @@ import mongoose, { Error } from 'mongoose';
 import { createPayment } from './helpers/payment.js';
 
 const routerApp = Router();
-
+routerApp.use(checkaAccessApp);
 //  GET
 routerApp.get('/getUsers', checkAccessAdmin, async (req, res) => {
   try {

@@ -17,19 +17,6 @@ config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use((req, res, next) => {
-  const key = req.headers['x-access-code'];
-  console.log('Request access ...');
-  if (key && key === process.env.ACCESS_KEY) {
-    console.log('Done!');
-    next();
-  } else {
-    console.log('Access is denied!');
-    res.status(403).json({
-      error: 'Access is denied!',
-    });
-  }
-});
 
 const payment = express();
 payment.use(cors());
