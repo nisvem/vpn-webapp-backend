@@ -120,7 +120,7 @@ export async function disableKey(id: ObjectId) {
   });
 
   try {
-    await outlinevpn.addDataLimit(key.id, 8 * 1024);
+    await outlinevpn.addDataLimit(key.id, 0);
     await bot.api.sendMessage(
       key.user.telegramId,
       `Your key <b>"${key.name}"</b> 🗝️ for server <b>"${key.server.name} (${

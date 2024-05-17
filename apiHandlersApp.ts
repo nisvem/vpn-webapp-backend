@@ -332,7 +332,7 @@ routerApp.post(
         newKey.id,
         `${req.body.name} (@${user.username})`
       );
-      await outlinevpn.addDataLimit(newKey.id, 8 * 1024);
+      await outlinevpn.addDataLimit(newKey.id, 0);
 
       const key = new Key({
         _id: new mongoose.Types.ObjectId(),
