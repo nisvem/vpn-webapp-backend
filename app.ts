@@ -55,7 +55,7 @@ const start = async () => {
 };
 
 app.use('/api', apiHandlersApp);
-payment.use('/api', apiHandlersPayment);
+payment.use('/payment', apiHandlersPayment);
 
 bot.start();
 start();
