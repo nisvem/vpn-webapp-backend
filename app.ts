@@ -44,20 +44,21 @@ const start = async () => {
     await mongoose.connect(process.env.MODGO_URL as string, { dbName: 'vpn' });
     console.log('Connected to MongoDB');
 
+    app.use('/api', apiHandlersApp);
+    payment.use('/payment', apiHandlersPayment);
+
     app.listen(process.env.PORT_APP, () => {
       console.log(`App server started on port ${process.env.PORT_APP}`);
     });
     payment.listen(process.env.PORT_PAYMENT, () => {
       console.log(`Payment server started on port ${process.env.PORT_PAYMENT}`);
     });
+
+    bot.start();
   } catch (error: any) {
     console.log('Something went wrong!', error.message);
     process.exit(1);
   }
 };
 
-app.use('/api', apiHandlersApp);
-payment.use('/payment', apiHandlersPayment);
-
-bot.start();
 start();
