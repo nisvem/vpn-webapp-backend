@@ -392,7 +392,7 @@ router.post('/getUrlToChat', checkAccess, async (req, res) => {
   }
 });
 
-router.post('/callbackPayment', async (req, res) => {
+router.post('/callbackPayment/', async (req, res) => {
   console.log(req);
 
   try {
