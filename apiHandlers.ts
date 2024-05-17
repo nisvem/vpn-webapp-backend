@@ -378,11 +378,12 @@ router.post('/deleteKey', checkAccess, async (req, res) => {
 router.post('/getUrlToChat', checkAccess, async (req, res) => {
   try {
     const telegramId = req.body.telegramId;
-    const key = await Key.findById(req.body.idKey).populate('server').exec();
+    const keyId = req.body.keyId;
+    const key = await Key.findById(keyId).populate('server').exec();
 
     if (!key) throw new Error("The key doesn't exist.");
 
-    const url = await createPayment(req.body.idKey, telegramId);
+    const url = await createPayment(keyId, telegramId);
     await bot.api.sendMessage(telegramId, url || 'Ошибка');
 
     res.status(200).json();
