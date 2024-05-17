@@ -4,22 +4,27 @@ import { bot } from './bot.js';
 
 const routerPayment = Router();
 
-routerPayment.post('/callbackPayment/', async (req, res) => {
-  console.log('req:', req);
-  console.log('res:', res);
+routerPayment.post('/callbackPayment', async (req, res) => {
+  console.log('Received request:', req.body);
+
+  const { object } = req.body;
+  const { metadata } = object;
+
+  if (!metadata || !metadata.telegramId || !metadata.id_key) {
+    console.error('Invalid request body:', req.body);
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
 
   try {
-    await bot.api.sendMessage(
-      req.body.object.metadata.telegramId,
-      'Ключ активирован!'
-    );
-    await enableKey(req.body.object.metadata.id_key);
+    await bot.api.sendMessage(metadata.telegramId, 'Ключ активирован!');
+    await enableKey(metadata.id_key);
 
-    res.status(200).json();
+    res.status(200).json({ message: 'Success' });
   } catch (error: any) {
+    console.error('Error processing payment callback:', error);
     await bot.api.sendMessage(
-      req.body.object.metadata.telegramId,
-      'Something wrong! Text me @nisvem for fix it!'
+      metadata.telegramId,
+      'Something went wrong! Text me @nisvem for fix it!'
     );
     res.status(500).json({ error: error.message });
   }

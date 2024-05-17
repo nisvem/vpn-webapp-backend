@@ -40,16 +40,18 @@ payment.use(express.json());
 
 const start = async () => {
   try {
+    console.log('Connecting to MongoDB...');
     await mongoose.connect(process.env.MODGO_URL as string, { dbName: 'vpn' });
+    console.log('Connected to MongoDB');
 
     app.listen(process.env.PORT_APP, () => {
-      console.log('Server started!');
+      console.log(`App server started on port ${process.env.PORT_APP}`);
     });
     payment.listen(process.env.PORT_PAYMENT, () => {
-      console.log('Server payment started!');
+      console.log(`Payment server started on port ${process.env.PORT_PAYMENT}`);
     });
   } catch (error: any) {
-    console.log('Something wrong!', error.message);
+    console.log('Something went wrong!', error.message);
     process.exit(1);
   }
 };
