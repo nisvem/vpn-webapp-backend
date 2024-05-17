@@ -392,8 +392,9 @@ router.post('/getUrlToChat', checkAccess, async (req, res) => {
   }
 });
 
-router.get('/callbackPayment', async (req, res) => {
-  console.log(req);
+router.post('/callbackPayment/', async (req, res) => {
+  console.log('req:', req);
+  console.log('res:', res);
 
   try {
     await bot.api.sendMessage(req.metadata.telegramId, 'Ключ активирован!');
