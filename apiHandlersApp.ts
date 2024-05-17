@@ -328,8 +328,11 @@ routerApp.post(
       });
 
       const newKey = await outlinevpn.createUser();
-      await outlinevpn.renameUser(newKey.id, req.body.name);
-      await outlinevpn.disableUser(newKey.id);
+      await outlinevpn.renameUser(
+        newKey.id,
+        `${req.body.name} (@${user.username})`
+      );
+      await outlinevpn.addDataLimit(newKey.id, 8 * 1024);
 
       const key = new Key({
         _id: new mongoose.Types.ObjectId(),

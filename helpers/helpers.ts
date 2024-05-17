@@ -118,7 +118,9 @@ export async function disableKey(id: ObjectId) {
     apiUrl: key.server.URL,
     fingerprint: key.server.FINGERPRINT,
   });
+
   try {
+    await outlinevpn.addDataLimit(key.id, 8 * 1024);
     await bot.api.sendMessage(
       key.user.telegramId,
       `Your key <b>"${key.name}"</b> 🗝️ for server <b>"${key.server.name} (${
@@ -134,9 +136,7 @@ export async function disableKey(id: ObjectId) {
     console.log(e);
   }
 
-  await outlinevpn.addDataLimit(key.id, 1024);
   key.isOpen = false;
-
   await key.save();
 
   return key;
