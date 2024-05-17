@@ -15,10 +15,10 @@ import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 
 import date from 'date-and-time';
 
-import User, { IUser } from './models/user';
-import Key, { IKey } from './models/key';
-import Server, { IServer } from './models/server';
-import Tariff, { ITariff } from './models/tariff';
+import User from './models/user';
+import Key from './models/key';
+import Server from './models/server';
+import Tariff from './models/tariff';
 import mongoose, { Error } from 'mongoose';
 import { createPayment } from './helpers/payment';
 
@@ -335,7 +335,7 @@ routerApp.post(
         _id: new mongoose.Types.ObjectId(),
         accessUrl: newKey.accessUrl,
         id: newKey.id,
-        name: req.body.name,
+        name: `${req.body.name} (@${user.username})`,
         user: user._id,
         isOpen: false,
         server: server._id,
