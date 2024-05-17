@@ -26,7 +26,7 @@ routerPayment.post('/callbackPayment', async (req, res) => {
     key.lastPayment = new Date();
     key.nextPayment = date.addDays(new Date(), days);
 
-    await enableKey(key.id);
+    await enableKey(key._id);
     await bot.api.sendMessage(
       telegramId,
       `The next payment date is ${date.format(key.nextPayment, 'D MMMM YYYY')}.`

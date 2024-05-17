@@ -6,6 +6,7 @@ import Key, { IKey } from '../models/key';
 import { IServer } from '../models/server';
 import { HydratedDocument } from 'mongoose';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
+import { ObjectId } from 'mongodb';
 
 type Middleware = (
   req: Request,
@@ -109,7 +110,7 @@ export async function checkOpenToRegister(
   await server.save();
 }
 
-export async function disableKey(id: string) {
+export async function disableKey(id: ObjectId) {
   const key = await Key.findById(id).populate('user server').exec();
 
   if (!key) throw new Error("The key doesn't exist.");
@@ -142,7 +143,7 @@ export async function disableKey(id: string) {
   return key;
 }
 
-export async function enableKey(id: string) {
+export async function enableKey(id: ObjectId) {
   const key = await Key.findById(id).populate('user server').exec();
 
   if (!key) throw new Error("The key doesn't exist.");
