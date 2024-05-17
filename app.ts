@@ -7,14 +7,14 @@ import cors from 'cors';
 
 import { bot } from './bot';
 
-import apiHandlers from './apiHandlers';
+import apiHandlersApp from './apiHandlersApp';
+import apiHandlersPayment from './apiHandlersPayment';
 
 // config({ path: `.env.local` });
 
 config();
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 app.use((req, res, next) => {
@@ -29,6 +29,10 @@ app.use((req, res, next) => {
   }
 });
 
+const payment = express();
+payment.use(cors());
+payment.use(express.json());
+
 // const localServer = https.createServer(
 //   { key: fs.readFileSync('./key.pem'), cert: fs.readFileSync('./cert.pem') },
 //   app
@@ -38,8 +42,11 @@ const start = async () => {
   try {
     await mongoose.connect(process.env.MODGO_URL as string, { dbName: 'vpn' });
 
-    app.listen(process.env.PORT, () => {
+    app.listen(process.env.PORT_APP, () => {
       console.log('Server started!');
+    });
+    payment.listen(process.env.PORT_PAYMENT, () => {
+      console.log('Server payment started!');
     });
   } catch (error: any) {
     console.log('Something wrong!', error.message);
@@ -47,7 +54,8 @@ const start = async () => {
   }
 };
 
-app.use('/api', apiHandlers);
+app.use('/api', apiHandlersApp);
+payment.use('/api', apiHandlersPayment);
 
 bot.start();
 start();

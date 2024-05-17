@@ -9,20 +9,20 @@ import {
   disableKey,
   enableKey,
 } from './helpers/helpers.js';
-import { bot } from './bot';
+import { bot } from './bot.js';
 
 import date from 'date-and-time';
 
-import User, { IUser } from './models/user';
-import Key, { IKey } from './models/key';
-import Server, { IServer } from './models/server';
+import User, { IUser } from './models/user.js';
+import Key, { IKey } from './models/key.js';
+import Server, { IServer } from './models/server.js';
 import mongoose, { Error } from 'mongoose';
-import { createPayment } from './helpers/payment';
+import { createPayment } from './helpers/payment.js';
 
-const router = Router();
+const routerApp = Router();
 
 //  GET
-router.get('/getUsers', checkAccessAdmin, async (req, res) => {
+routerApp.get('/getUsers', checkAccessAdmin, async (req, res) => {
   try {
     const users = await User.find();
 
@@ -32,7 +32,7 @@ router.get('/getUsers', checkAccessAdmin, async (req, res) => {
   }
 });
 
-router.get('/getUser/:id', checkAccess, async (req, res) => {
+routerApp.get('/getUser/:id', checkAccess, async (req, res) => {
   try {
     const actualUser = await User.findOne({
       telegramId: req.headers['x-telegram-id'],
@@ -72,7 +72,7 @@ router.get('/getUser/:id', checkAccess, async (req, res) => {
   }
 });
 
-router.get('/getAllKeys', checkAccessAdmin, async (req, res) => {
+routerApp.get('/getAllKeys', checkAccessAdmin, async (req, res) => {
   try {
     const keys = await Key.find()
       .populate('user')
@@ -84,7 +84,7 @@ router.get('/getAllKeys', checkAccessAdmin, async (req, res) => {
   }
 });
 
-router.get('/getKeys', checkAccess, async (req, res) => {
+routerApp.get('/getKeys', checkAccess, async (req, res) => {
   try {
     const telegramId = req.headers['x-telegram-id'];
 
@@ -112,7 +112,7 @@ router.get('/getKeys', checkAccess, async (req, res) => {
   }
 });
 
-router.get('/getServers', checkAccess, async (req, res) => {
+routerApp.get('/getServers', checkAccess, async (req, res) => {
   try {
     const servers = await Server.find(
       { isOpenToRegister: true },
@@ -129,7 +129,7 @@ router.get('/getServers', checkAccess, async (req, res) => {
   }
 });
 
-router.get('/getKey/:id', checkAccess, async (req, res) => {
+routerApp.get('/getKey/:id', checkAccess, async (req, res) => {
   try {
     const telegramId = req.headers['x-telegram-id'] as string;
 
@@ -155,7 +155,7 @@ router.get('/getKey/:id', checkAccess, async (req, res) => {
   }
 });
 
-router.get('/getDataUsage/:id', checkAccess, async (req, res) => {
+routerApp.get('/getDataUsage/:id', checkAccess, async (req, res) => {
   try {
     const key = await Key.findById(req.params.id).populate('server').exec();
 
@@ -179,7 +179,7 @@ router.get('/getDataUsage/:id', checkAccess, async (req, res) => {
 
 // POST
 
-router.post('/disableKey', checkAccessAdmin, async (req, res) => {
+routerApp.post('/disableKey', checkAccessAdmin, async (req, res) => {
   try {
     const key = await disableKey(req.body.id);
 
@@ -189,7 +189,7 @@ router.post('/disableKey', checkAccessAdmin, async (req, res) => {
   }
 });
 
-router.post('/enableKey', checkAccessAdmin, async (req, res) => {
+routerApp.post('/enableKey', checkAccessAdmin, async (req, res) => {
   try {
     const key = await enableKey(req.body.id);
 
@@ -199,7 +199,7 @@ router.post('/enableKey', checkAccessAdmin, async (req, res) => {
   }
 });
 
-router.post('/createUser', checkAccess, async (req, res) => {
+routerApp.post('/createUser', checkAccess, async (req, res) => {
   try {
     const telegramId = req.body.telegramId;
 
@@ -223,7 +223,7 @@ router.post('/createUser', checkAccess, async (req, res) => {
   }
 });
 
-router.post('/updateUser', checkAccess, async (req, res) => {
+routerApp.post('/updateUser', checkAccess, async (req, res) => {
   try {
     const data = req.body;
 
@@ -248,7 +248,7 @@ router.post('/updateUser', checkAccess, async (req, res) => {
   }
 });
 
-router.post('/editUser', checkAccessAdmin, async (req, res) => {
+routerApp.post('/editUser', checkAccessAdmin, async (req, res) => {
   try {
     const data = req.body;
 
@@ -272,7 +272,7 @@ router.post('/editUser', checkAccessAdmin, async (req, res) => {
   }
 });
 
-router.post('/editKey', checkAccessAdmin, async (req, res) => {
+routerApp.post('/editKey', checkAccessAdmin, async (req, res) => {
   try {
     const data = req.body;
     console.log(data);
@@ -290,7 +290,7 @@ router.post('/editKey', checkAccessAdmin, async (req, res) => {
   }
 });
 
-router.post(
+routerApp.post(
   '/createKey',
   checkAccess,
   checkLimitedToCreate,
@@ -343,7 +343,7 @@ router.post(
   }
 );
 
-router.post('/deleteKey', checkAccess, async (req, res) => {
+routerApp.post('/deleteKey', checkAccess, async (req, res) => {
   try {
     const keyId = req.body.id;
 
@@ -375,7 +375,7 @@ router.post('/deleteKey', checkAccess, async (req, res) => {
   }
 });
 
-router.post('/getUrlToChat', checkAccess, async (req, res) => {
+routerApp.post('/getUrlToChat', checkAccess, async (req, res) => {
   try {
     const telegramId = req.body.telegramId;
     const keyId = req.body.keyId;
@@ -392,22 +392,4 @@ router.post('/getUrlToChat', checkAccess, async (req, res) => {
   }
 });
 
-router.post('/callbackPayment/', async (req, res) => {
-  console.log('req:', req);
-  console.log('res:', res);
-
-  try {
-    await bot.api.sendMessage(req.metadata.telegramId, 'Ключ активирован!');
-    await enableKey(req.metadata.id_key);
-
-    res.status(200).json();
-  } catch (error: any) {
-    await bot.api.sendMessage(
-      req.metadata.telegramId,
-      'Something wrong! Text me @nisvem for fix it!'
-    );
-    res.status(500).json({ error: error.message });
-  }
-});
-
-export default router;
+export default routerApp;
