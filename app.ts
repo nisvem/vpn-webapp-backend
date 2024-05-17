@@ -18,9 +18,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const payment = express();
-payment.use(cors());
-payment.use(express.json());
+app.use('/api', apiHandlersApp);
+app.use('/payment', apiHandlersPayment);
 
 // const localServer = https.createServer(
 //   { key: fs.readFileSync('./key.pem'), cert: fs.readFileSync('./cert.pem') },
@@ -33,14 +32,8 @@ const start = async () => {
     await mongoose.connect(process.env.MODGO_URL as string, { dbName: 'vpn' });
     console.log('Connected to MongoDB');
 
-    app.use('/api', apiHandlersApp);
-    payment.use('/payment', apiHandlersPayment);
-
     app.listen(process.env.PORT || 3000, () => {
       console.log(`App server started on port ${process.env.PORT}`);
-    });
-    payment.listen(process.env.PORT_PAYMENT || 8443, () => {
-      console.log(`Payment server started on port ${process.env.PORT_PAYMENT}`);
     });
 
     bot.start();
