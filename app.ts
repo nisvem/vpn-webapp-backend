@@ -48,7 +48,7 @@ const start = async () => {
     payment.use('/payment', apiHandlersPayment);
 
     app.listen(process.env.PORT || 3000, () => {
-      console.log(`App server started on port ${process.env.PORT_APP}`);
+      console.log(`App server started on port ${process.env.PORT}`);
     });
     payment.listen(process.env.PORT_PAYMENT || 8443, () => {
       console.log(`Payment server started on port ${process.env.PORT_PAYMENT}`);

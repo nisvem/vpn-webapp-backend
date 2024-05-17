@@ -4,7 +4,7 @@ import { bot } from './bot.js';
 
 const routerPayment = Router();
 
-routerPayment.post('/callbackPayment', async (req, res) => {
+routerPayment.post('/callbackPayment/', async (req, res) => {
   console.log('Received request:', req.body);
 
   const { object } = req.body;
