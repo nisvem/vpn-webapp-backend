@@ -25,7 +25,7 @@ const start = async () => {
     await mongoose.connect(process.env.MODGO_URL as string, { dbName: 'vpn' });
     console.log('Connected to MongoDB');
 
-    if (process.env.LOCAL_SERVER) {
+    if (process.env.LOCAL_SERVER == 'true') {
       const localServer = https.createServer(
         {
           key: fs.readFileSync('./key.pem'),
