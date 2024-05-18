@@ -74,7 +74,7 @@ routerApp.get('/getUser/:id', checkAccess, async (req, res) => {
 
       res.json(user);
     } else {
-      res.status(403).json({
+      res.status(301).json({
         error: {
           message: 'Access is denied!',
         },
@@ -214,6 +214,7 @@ routerApp.post('/enableKey', checkAccessAdmin, async (req, res) => {
 
 routerApp.post('/createUser', checkAccess, async (req, res) => {
   try {
+    console.log(req.body);
     const telegramId = req.body.telegramId;
 
     const data = req.body,
@@ -226,6 +227,8 @@ routerApp.post('/createUser', checkAccess, async (req, res) => {
         dateOfCreateUser: new Date(),
         lastViewedApp: new Date(),
       });
+
+    console.log(user);
 
     await user.save();
 
@@ -385,8 +388,8 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
     server.keys = server.keys.filter((key) => key._id != keyId);
 
     await outlinevpn.deleteUser(key.id);
-    await checkOpenToRegister(user, server);
     await Key.findByIdAndDelete(keyId);
+    await checkOpenToRegister(user, server);
 
     res.status(200).json(user);
   } catch (error: any) {

@@ -4,9 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { IKey } from '../models/key';
 import { ITariff } from '../models/tariff';
 
-// config({ path: `.env.local` });
-config();
-
 const YooKassa = new YooCheckout({
   shopId: `${process.env.SHOP_ID_YOOKASSA}`,
   secretKey: `${process.env.SECRET_KEY_YOOKASSA}`,

@@ -2,7 +2,7 @@ import { Schema, model, Types } from 'mongoose';
 import { IKey } from './key';
 
 const user: Schema = new Schema({
-  username: { type: String, required: true },
+  username: { type: String, required: false, default: '' },
   telegramId: { type: String, required: true, unique: true },
 
   isAdmin: { type: Boolean, required: true, default: false },

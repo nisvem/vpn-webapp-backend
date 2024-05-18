@@ -7,7 +7,6 @@ import { IServer } from '../models/server';
 import { HydratedDocument } from 'mongoose';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 import { ObjectId } from 'mongodb';
-import date from 'date-and-time';
 
 type Middleware = (
   req: Request,

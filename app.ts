@@ -10,9 +10,7 @@ import apiHandlersApp from './apiHandlersApp';
 import apiHandlersPayment from './apiHandlersPayment';
 import startCron from './helpers/crons';
 
-// config({ path: `.env.local` });
-
-config();
+config({ path: ['.env', '.env.local'] });
 
 const app = express();
 app.use(cors());
@@ -21,20 +19,30 @@ app.use(express.json());
 app.use('/api', apiHandlersApp);
 app.use('/payment', apiHandlersPayment);
 
-// const localServer = https.createServer(
-//   { key: fs.readFileSync('./key.pem'), cert: fs.readFileSync('./cert.pem') },
-//   app
-// );
-
 const start = async () => {
   try {
     console.log('Connecting to MongoDB...');
     await mongoose.connect(process.env.MODGO_URL as string, { dbName: 'vpn' });
     console.log('Connected to MongoDB');
 
-    app.listen(process.env.PORT || 3000, () => {
-      console.log(`App server started on port ${process.env.PORT}`);
-    });
+    if (process.env.LOCAL_SERVER) {
+      const localServer = https.createServer(
+        {
+          key: fs.readFileSync('./key.pem'),
+          cert: fs.readFileSync('./cert.pem'),
+        },
+        app
+      );
+
+      localServer.listen(process.env.PORT || 3000, () => {
+        console.log(`App server started on port ${process.env.PORT}`);
+      });
+    } else {
+      app.listen(process.env.PORT || 3000, () => {
+        console.log(`App server started on port ${process.env.PORT}`);
+      });
+    }
+
     bot.start();
     await startCron();
   } catch (error: any) {
