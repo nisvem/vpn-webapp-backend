@@ -39,7 +39,6 @@ export async function createPayment(
       createPayload,
       idempotence_key
     );
-    console.log(payment);
     return payment.confirmation.confirmation_url;
   } catch (error) {
     console.error(error);

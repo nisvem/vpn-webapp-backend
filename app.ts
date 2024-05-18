@@ -46,7 +46,7 @@ const start = async () => {
     bot.start();
     await startCron();
   } catch (error: any) {
-    console.log('Something went wrong!', error.message);
+    console.error('Something went wrong!', error.message);
     process.exit(1);
   }
 };

@@ -19,7 +19,6 @@ export const checkAccessApp: Middleware = async (req, res, next) => {
   if (key && key === process.env.ACCESS_KEY) {
     next();
   } else {
-    console.log('Access is denied!');
     res.status(403).json({
       error: 'Access is denied!',
     });
@@ -132,7 +131,7 @@ export async function disableKey(id: ObjectId) {
       }
     );
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 
   key.isOpen = false;
@@ -164,7 +163,7 @@ export async function enableKey(id: ObjectId) {
       }
     );
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 
   await outlinevpn.enableUser(key.id);

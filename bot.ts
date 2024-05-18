@@ -1,5 +1,7 @@
 import { config } from 'dotenv';
+import { text } from 'express';
 import { Bot, InlineKeyboard } from 'grammy';
+import user from './models/user';
 
 config();
 
@@ -16,18 +18,30 @@ const keyboard = new InlineKeyboard([
   ],
 ]);
 
-bot.command('start', (ctx) =>
-  ctx.reply(
+bot.command('start', async (ctx) => {
+  const message = await ctx.reply('Loading ...', {
+    reply_markup: {
+      remove_keyboard: true,
+    },
+  });
+
+  await ctx.api.setChatMenuButton({
+    chat_id: ctx.chat.id,
+    menu_button: {
+      type: 'web_app',
+      text: 'Keys 🔑',
+      web_app: {
+        url: process.env.URL_WEBAPP || '',
+      },
+    },
+  });
+
+  await ctx.reply(
     `Hi!👋 \n\nTo get started and receive your server key or manage these please click on the menu on the sidebar 🔑, or click here to access the web app 👇`,
     {
-      parse_mode: 'HTML',
-      reply_markup: {
-        ...keyboard,
-      },
+      reply_markup: keyboard,
     }
-  )
-);
+  );
 
-bot.on('message', async (ctx) => {
-  console.log(ctx.from);
+  await bot.api.deleteMessage(message.chat.id, message.message_id);
 });

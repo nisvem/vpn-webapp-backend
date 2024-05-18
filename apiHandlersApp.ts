@@ -51,34 +51,34 @@ routerApp.get('/getUser/:id', checkAccess, async (req, res) => {
       telegramId: req.headers['x-telegram-id'],
     });
 
-    let user;
+    if (actualUser) {
+      let user;
 
-    if (actualUser?.isAdmin || actualUser?.telegramId == req.params.id) {
-      user = await User.findOne({ telegramId: req.params.id })
-        .populate('keys')
-        .populate({
-          path: 'keys',
-          populate: [
-            {
-              path: 'server',
-              select: 'name country abbreviatedCountry',
-              model: 'server',
-            },
-            {
-              path: 'user',
-              model: 'user',
-            },
-          ],
-        })
-        .exec();
+      if (actualUser?.isAdmin || actualUser?.telegramId == req.params.id) {
+        user = await User.findOne({ telegramId: req.params.id })
+          .populate('keys')
+          .populate({
+            path: 'keys',
+            populate: [
+              {
+                path: 'server',
+                select: 'name country abbreviatedCountry',
+                model: 'server',
+              },
+              {
+                path: 'user',
+                model: 'user',
+              },
+            ],
+          })
+          .exec();
 
-      res.json(user);
+        res.json(user);
+      } else {
+        throw new Error('Access is denied!');
+      }
     } else {
-      res.status(301).json({
-        error: {
-          message: 'Access is denied!',
-        },
-      });
+      res.json(null);
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -159,9 +159,7 @@ routerApp.get('/getKey/:id', checkAccess, async (req, res) => {
     ) {
       res.status(200).json(key);
     } else {
-      res.status(403).json({
-        error: 'Access is denied!',
-      });
+      throw new Error('Access is denied!');
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -214,7 +212,6 @@ routerApp.post('/enableKey', checkAccessAdmin, async (req, res) => {
 
 routerApp.post('/createUser', checkAccess, async (req, res) => {
   try {
-    console.log(req.body);
     const telegramId = req.body.telegramId;
 
     const data = req.body,
@@ -222,13 +219,12 @@ routerApp.post('/createUser', checkAccess, async (req, res) => {
         _id: new mongoose.Types.ObjectId(),
         username: data?.username || '',
         telegramId: telegramId,
+        phoneNumber: data?.phoneNumber || '',
         name: data?.name || '',
         surname: data?.surname || '',
         dateOfCreateUser: new Date(),
         lastViewedApp: new Date(),
       });
-
-    console.log(user);
 
     await user.save();
 
@@ -241,21 +237,24 @@ routerApp.post('/createUser', checkAccess, async (req, res) => {
 routerApp.post('/updateUser', checkAccess, async (req, res) => {
   try {
     const data = req.body;
+    const user = await User.findOne(
+      { telegramId: data.telegramId },
+      'telegramId name username phoneNumber surname keys isAdmin isLimitedToCreate maxKeyAvalible'
+    );
+    if (!user) throw new Error("The user doesn't exist.");
 
     await User.updateOne(
       { telegramId: data.telegramId },
       {
         username: data?.username || '',
         name: data?.name || '',
+        phoneNumber: data?.phoneNumber || user?.phoneNumber || '',
         surname: data?.surname || '',
         lastViewedApp: new Date(),
       }
     );
 
-    const user = await User.findOne(
-      { telegramId: data.telegramId },
-      'telegramId name username surname keys isAdmin isLimitedToCreate maxKeyAvalible'
-    );
+    user.save();
 
     res.json(user);
   } catch (error: any) {
@@ -290,7 +289,6 @@ routerApp.post('/editUser', checkAccessAdmin, async (req, res) => {
 routerApp.post('/editKey', checkAccessAdmin, async (req, res) => {
   try {
     const data = req.body;
-    console.log(data);
 
     const key = await Key.findByIdAndUpdate(data.id, {
       name: data.name,

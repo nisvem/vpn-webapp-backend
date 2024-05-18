@@ -5,6 +5,8 @@ const user: Schema = new Schema({
   username: { type: String, required: false, default: '' },
   telegramId: { type: String, required: true, unique: true },
 
+  phoneNumber: { type: String, required: false },
+
   isAdmin: { type: Boolean, required: true, default: false },
   isLimitedToCreate: { type: Boolean, required: true, default: false },
   maxKeyAvalible: { type: Number, required: true, default: 2 },
@@ -22,6 +24,8 @@ export interface IUser {
   _id: Types.ObjectId;
   username: string;
   telegramId: string;
+
+  phoneNumber: string;
 
   isAdmin: boolean;
   isLimitedToCreate: boolean;
