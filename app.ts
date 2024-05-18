@@ -10,7 +10,7 @@ import apiHandlersApp from './apiHandlersApp';
 import apiHandlersPayment from './apiHandlersPayment';
 import startCron from './helpers/crons';
 
-config({ path: ['.env', '.env.local'] });
+config();
 
 const app = express();
 app.use(cors());

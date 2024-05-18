@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import { Bot, InlineKeyboard } from 'grammy';
 
-config({ path: ['.env', '.env.local'] });
+config();
 
 export const bot = new Bot(process.env.BOT_TOKEN + '');
 
