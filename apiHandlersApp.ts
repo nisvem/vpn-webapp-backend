@@ -219,10 +219,10 @@ routerApp.post('/createUser', checkAccess, async (req, res) => {
     const data = req.body,
       user = new User({
         _id: new mongoose.Types.ObjectId(),
-        username: data.username || '',
+        username: data?.username || '',
         telegramId: telegramId,
-        name: data.name || '',
-        surname: data.surname || '',
+        name: data?.name || '',
+        surname: data?.surname || '',
         dateOfCreateUser: new Date(),
         lastViewedApp: new Date(),
       });
@@ -242,9 +242,9 @@ routerApp.post('/updateUser', checkAccess, async (req, res) => {
     await User.updateOne(
       { telegramId: data.telegramId },
       {
-        username: data.username || '',
-        name: data.name || '',
-        surname: data.surname || '',
+        username: data?.username || '',
+        name: data?.name || '',
+        surname: data?.surname || '',
         lastViewedApp: new Date(),
       }
     );
