@@ -357,11 +357,11 @@ routerApp.post(
       await checkOpenToRegister(user, server);
 
       await bot.api.sendMessage(
-        key.user.telegramId,
-        `Your Key "${key.name}" 🗝️  for server "${key.server.name} (${
-          key.server.country
+        user.telegramId,
+        `Your Key "${key.name}" 🗝️  for server "${server.name} (${
+          server.country
         } ${getUnicodeFlagIcon(
-          key.server.abbreviatedCountry
+          server.abbreviatedCountry
         )})" has been created ✅.`
       );
 
