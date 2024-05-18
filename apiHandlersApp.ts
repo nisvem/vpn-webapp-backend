@@ -356,6 +356,15 @@ routerApp.post(
       await key.save();
       await checkOpenToRegister(user, server);
 
+      await bot.api.sendMessage(
+        key.user.telegramId,
+        `Your Key "${key.name}" 🗝️  for server "${key.server.name} (${
+          key.server.country
+        } ${getUnicodeFlagIcon(
+          key.server.abbreviatedCountry
+        )})" has been created ✅.`
+      );
+
       res.status(200).json({ user, key });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -388,6 +397,15 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
     await outlinevpn.deleteUser(key.id);
     await Key.findByIdAndDelete(keyId);
     await checkOpenToRegister(user, server);
+
+    await bot.api.sendMessage(
+      key.user.telegramId,
+      `Your Key "${key.name}" 🗝️  for server "${key.server.name} (${
+        key.server.country
+      } ${getUnicodeFlagIcon(
+        key.server.abbreviatedCountry
+      )})" has been deleted 🗑️.`
+    );
 
     res.status(200).json(user);
   } catch (error: any) {
