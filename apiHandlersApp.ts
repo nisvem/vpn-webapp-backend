@@ -362,7 +362,7 @@ routerApp.post(
           server.country
         } ${getUnicodeFlagIcon(
           server.abbreviatedCountry
-        )})" has been created ✅.`
+        )})" has been created ✅.\nTo get started, choose a suitable plan and make the payment.`
       );
 
       res.status(200).json({ user, key });
