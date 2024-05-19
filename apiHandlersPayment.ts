@@ -2,6 +2,7 @@ import { Router } from 'express';
 import date from 'date-and-time';
 import { enableKey } from './helpers/helpers.js';
 import { bot } from './bot.js';
+import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 
 import Key from './models/key';
 
@@ -28,10 +29,19 @@ routerPayment.post('/callbackPayment', async (req, res) => {
     key.nextPayment = date.addDays(newDate, days);
     key.save();
 
-    await enableKey(key._id);
+    !key.isOpen && (await enableKey(key._id));
     await bot.api.sendMessage(
       key.user.telegramId,
-      `The next payment date is ${date.format(key.nextPayment, 'D MMMM YYYY')}.`
+      `Payment was successful\x20✅. Your key ${
+        key.name
+      }\x20🔑 for the server "${key.server.name} (${
+        key.server.country
+      } ${getUnicodeFlagIcon(
+        key.server.abbreviatedCountry
+      )})" has been extended for ${days} days.\n\nThe next payment date is ${date.format(
+        key.nextPayment,
+        'D MMMM YYYY'
+      )}.`
     );
 
     res.status(200).json({ message: 'Success' });

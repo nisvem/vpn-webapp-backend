@@ -37,7 +37,7 @@ bot.command('start', async (ctx) => {
   });
 
   await ctx.reply(
-    `Hi!👋 \n\nTo get started and receive your server key or manage these please click on the menu on the sidebar 🔑, or click here to access the web app 👇`,
+    `Hi!\x20👋 \n\nTo get started and receive your server key or manage these please click on the menu on the sidebar\x20🔑, or click here to access the web app\x20👇`,
     {
       reply_markup: keyboard,
     }

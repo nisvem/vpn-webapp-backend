@@ -121,11 +121,11 @@ export async function disableKey(id: ObjectId) {
     await outlinevpn.addDataLimit(key.id, 0);
     await bot.api.sendMessage(
       key.user.telegramId,
-      `Your key <b>"${key.name}"</b> 🗝️ for server <b>"${key.server.name} (${
+      `Your key <b>"${key.name}"</b>\x20🔑 for server <b>"${key.server.name} (${
         key.server.country
       } ${getUnicodeFlagIcon(
         key.server.abbreviatedCountry
-      )})"</b> has been deactivated ⛔️.`,
+      )})"</b> has been deactivated\x20⛔️.`,
       {
         parse_mode: 'HTML',
       }
@@ -157,7 +157,7 @@ export async function enableKey(id: ObjectId) {
         key.server.country
       } ${getUnicodeFlagIcon(
         key.server.abbreviatedCountry
-      )})"</b> has been activated ✅.`,
+      )})"</b> has been activated\x20✅.`,
       {
         parse_mode: 'HTML',
       }

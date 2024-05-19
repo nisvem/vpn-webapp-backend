@@ -340,9 +340,7 @@ routerApp.post(
         _id: new mongoose.Types.ObjectId(),
         accessUrl: newKey.accessUrl,
         id: newKey.id,
-        name: `${req.body.name} (${
-          user.username ? '@' + user.username : user.telegramId
-        })`,
+        name: req.body.name,
         user: user._id,
         isOpen: false,
         server: server._id,
@@ -358,11 +356,11 @@ routerApp.post(
 
       await bot.api.sendMessage(
         user.telegramId,
-        `Your Key "${key.name}" 🗝️  for server "${server.name} (${
+        `Your Key "${key.name}"\x20🔑  for server "${server.name} (${
           server.country
         } ${getUnicodeFlagIcon(
           server.abbreviatedCountry
-        )})" has been created ✅.\nTo get started, choose a suitable plan and make the payment.`
+        )})" has been created\x20✅.\nTo get started, choose a suitable plan and make the payment.`
       );
 
       res.status(200).json({ user, key });
@@ -400,11 +398,11 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
 
     await bot.api.sendMessage(
       key.user.telegramId,
-      `Your Key "${key.name}" 🗝️  for server "${key.server.name} (${
+      `Your Key "${key.name}"\x20🔑  for server "${key.server.name} (${
         key.server.country
       } ${getUnicodeFlagIcon(
         key.server.abbreviatedCountry
-      )})" has been deleted 🗑️.`
+      )})" has been deleted\x20🗑️.`
     );
 
     res.status(200).json(user);
@@ -444,7 +442,7 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
           key.server.abbreviatedCountry
         )})\n<b>Payment period</b>: ${
           tariff.days
-        } days\n<b>Amount</b>: ${total} rub.\n\nTo make a payment, please use the following link 👇`,
+        } days\n<b>Amount</b>: ${total} rub.\n\nTo make a payment, please use the following link\x20👇`,
         {
           reply_markup: {
             inline_keyboard: [

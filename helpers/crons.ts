@@ -23,7 +23,7 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
 
       await bot.api.sendMessage(
         key.user.telegramId,
-        `Your Key "${key.name}" 🗝️ is expired (${date.format(
+        `Your Key "${key.name}"\x20🔑 is expired (${date.format(
           key.nextPayment,
           'DD/MM/YYYY'
         )}). To reactivate Key, please make a payment.`,
@@ -32,7 +32,7 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
             inline_keyboard: [
               [
                 {
-                  text: '🔑 Keys',
+                  text: 'Keys 🔑',
                   web_app: {
                     url: process.env.URL_WEBAPP || '',
                   },
@@ -53,10 +53,10 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
 
       await bot.api.sendMessage(
         key.user.telegramId,
-        `Your Key "${key.name}" 🗝️ has expired (${date.format(
+        `Your Key "${key.name}"\x20🔑 has expired (${date.format(
           key.nextPayment,
           'DD/MM/YYYY'
-        )}) and has been deleted. To create new Key click on the menu on the sidebar 🔑, or click here to access the web app 👇.`,
+        )}) and has been deleted\x20🗑️. To create new Key click on the menu on the sidebar\x20🔑, or click here to access the web app\x20👇.`,
         {
           reply_markup: {
             inline_keyboard: [
