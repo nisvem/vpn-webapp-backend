@@ -9,6 +9,7 @@ import { bot } from './bot';
 import apiHandlersApp from './apiHandlersApp';
 import apiHandlersPayment from './apiHandlersPayment';
 import startCron from './helpers/crons';
+import { findAvailablePort } from './helpers/helpers';
 
 config();
 
@@ -37,14 +38,15 @@ const start = async () => {
       localServer.listen(process.env.PORT || 3000, () => {
         console.log(`App server started on port ${process.env.PORT}`);
       });
+      bot.start();
     } else {
       app.listen(process.env.PORT || 3000, () => {
         console.log(`App server started on port ${process.env.PORT}`);
       });
-    }
 
-    bot.start();
-    await startCron();
+      bot.start();
+      await startCron();
+    }
   } catch (error: any) {
     console.error('Something went wrong!', error.message);
     process.exit(1);

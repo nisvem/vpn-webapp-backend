@@ -1,7 +1,7 @@
 import * as cron from 'cron';
 import date from 'date-and-time';
 
-import { checkOpenToRegister } from './helpers';
+import { checkOpenToRegister, dataLimitWhenDisable } from './helpers';
 
 import { OutlineVPN } from 'outlinevpn-api';
 import { bot } from '../bot';
@@ -23,7 +23,7 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
 
       await bot.api.sendMessage(
         key.user.telegramId,
-        `Your Key "${key.name}"\x20🔑 is expired (${date.format(
+        `Your Key "${key.name}"\xA0🔑 is expired (${date.format(
           key.nextPayment,
           'DD/MM/YYYY'
         )}). To reactivate Key, please make a payment.`,
@@ -53,10 +53,10 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
 
       await bot.api.sendMessage(
         key.user.telegramId,
-        `Your Key "${key.name}"\x20🔑 has expired (${date.format(
+        `Your Key "${key.name}"\xA0🔑 has expired (${date.format(
           key.nextPayment,
           'DD/MM/YYYY'
-        )}) and has been deleted\x20🗑️. To create new Key click on the menu on the sidebar\x20🔑, or click here to access the web app\x20👇.`,
+        )}) and has been deleted\xA0🗑️. To create new Key click on the menu on the sidebar\xA0🔑, or click here to access the web app\xA0👇.`,
         {
           reply_markup: {
             inline_keyboard: [
@@ -94,7 +94,7 @@ async function disableKey(key: HydratedDocument<IKey>) {
       fingerprint: key.server.FINGERPRINT,
     });
 
-    await outlinevpn.addDataLimit(key.id, 1024);
+    await outlinevpn.addDataLimit(key.id, dataLimitWhenDisable);
     key.isOpen = false;
 
     await key.save();

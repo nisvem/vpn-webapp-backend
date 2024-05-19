@@ -7,12 +7,23 @@ import { IServer } from '../models/server';
 import { HydratedDocument } from 'mongoose';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 import { ObjectId } from 'mongodb';
+import net from 'net';
 
 type Middleware = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => Promise<void>;
+
+export interface ErrnoException extends Error {
+  errno?: number;
+  code?: string;
+  path?: string;
+  syscall?: string;
+  stack?: string;
+}
+
+export const dataLimitWhenDisable = 1;
 
 export const checkAccessApp: Middleware = async (req, res, next) => {
   const key = req.headers['x-access-code'];
@@ -118,14 +129,14 @@ export async function disableKey(id: ObjectId) {
   });
 
   try {
-    await outlinevpn.addDataLimit(key.id, 0);
+    await outlinevpn.addDataLimit(key.id, dataLimitWhenDisable);
     await bot.api.sendMessage(
       key.user.telegramId,
-      `Your key <b>"${key.name}"</b>\x20🔑 for server <b>"${key.server.name} (${
+      `Your key <b>"${key.name}"</b>\xA0🔑 for server <b>"${key.server.name} (${
         key.server.country
       } ${getUnicodeFlagIcon(
         key.server.abbreviatedCountry
-      )})"</b> has been deactivated\x20⛔️.`,
+      )})"</b> has been deactivated\xA0⛔️.`,
       {
         parse_mode: 'HTML',
       }
@@ -157,7 +168,7 @@ export async function enableKey(id: ObjectId) {
         key.server.country
       } ${getUnicodeFlagIcon(
         key.server.abbreviatedCountry
-      )})"</b> has been activated\x20✅.`,
+      )})"</b> has been activated\xA0✅.`,
       {
         parse_mode: 'HTML',
       }
@@ -172,4 +183,46 @@ export async function enableKey(id: ObjectId) {
   await key.save();
 
   return key;
+}
+
+async function isPortAvailable(remoteHost: string, port: number) {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+
+    socket.setTimeout(100);
+
+    socket.on('connect', () => {
+      socket.destroy();
+      resolve(false); // Open port
+    });
+
+    socket.on('timeout', () => {
+      socket.destroy();
+      resolve(true); // Сlosed port
+    });
+
+    socket.on('error', (err: ErrnoException) => {
+      if (err.code === 'ECONNREFUSED') {
+        resolve(true); //  Open port
+      } else {
+        resolve(false); // Сlosed port
+      }
+    });
+
+    socket.connect(port, remoteHost);
+  });
+}
+
+export async function findAvailablePort(
+  remoteHost: string,
+  startPort: number,
+  endPort: number
+) {
+  for (let port = startPort; port <= endPort; port++) {
+    const available = await isPortAvailable(remoteHost, port);
+    if (available) {
+      return port;
+    }
+  }
+  throw new Error('Available port for creating Key not found.');
 }

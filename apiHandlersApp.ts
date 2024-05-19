@@ -9,11 +9,11 @@ import {
   disableKey,
   enableKey,
   checkAccessApp,
+  dataLimitWhenDisable,
+  findAvailablePort,
 } from './helpers/helpers.js';
 import { bot } from './bot.js';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
-
-import date from 'date-and-time';
 
 import User from './models/user';
 import Key from './models/key';
@@ -23,6 +23,7 @@ import mongoose, { Error } from 'mongoose';
 import { createPayment } from './helpers/payment';
 
 const routerApp = Router();
+
 routerApp.use(checkAccessApp);
 //  GET
 
@@ -322,19 +323,31 @@ routerApp.post(
         : userActual;
       if (!user) throw new Error("The user doesn't exist.");
 
+      const port = await findAvailablePort(
+        server.IP_SERVER,
+        server.PORT_FROM,
+        server.PORT_TO
+      );
+
+      console.log(`Available port found for creating Key: ${port}`);
+
       const outlinevpn = new OutlineVPN({
         apiUrl: server.URL,
         fingerprint: server.FINGERPRINT,
       });
 
+      await outlinevpn.setPortForNewAccessKeys(port);
+
       const newKey = await outlinevpn.createUser();
+
       await outlinevpn.renameUser(
         newKey.id,
         `${req.body.name} (${
           user.username ? '@' + user.username : user.telegramId
         })`
       );
-      await outlinevpn.addDataLimit(newKey.id, 0);
+
+      await outlinevpn.addDataLimit(newKey.id, dataLimitWhenDisable);
 
       const key = new Key({
         _id: new mongoose.Types.ObjectId(),
@@ -344,6 +357,7 @@ routerApp.post(
         user: user._id,
         isOpen: false,
         server: server._id,
+        portForKey: port,
         currentPrice: server.price,
         nextPayment: new Date(),
       });
@@ -356,11 +370,11 @@ routerApp.post(
 
       await bot.api.sendMessage(
         user.telegramId,
-        `Your Key "${key.name}"\x20🔑  for server "${server.name} (${
+        `Your Key "${key.name}"\xA0🔑  for server "${server.name} (${
           server.country
         } ${getUnicodeFlagIcon(
           server.abbreviatedCountry
-        )})" has been created\x20✅.\nTo get started, choose a suitable plan and make the payment.`
+        )})" has been created\xA0✅.\nTo get started, choose a suitable plan and make the payment.`
       );
 
       res.status(200).json({ user, key });
@@ -398,11 +412,11 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
 
     await bot.api.sendMessage(
       key.user.telegramId,
-      `Your Key "${key.name}"\x20🔑  for server "${key.server.name} (${
+      `Your Key "${key.name}"\xA0🔑  for server "${key.server.name} (${
         key.server.country
       } ${getUnicodeFlagIcon(
         key.server.abbreviatedCountry
-      )})" has been deleted\x20🗑️.`
+      )})" has been deleted\xA0🗑️.`
     );
 
     res.status(200).json(user);
@@ -442,7 +456,7 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
           key.server.abbreviatedCountry
         )})\n<b>Payment period</b>: ${
           tariff.days
-        } days\n<b>Amount</b>: ${total} rub.\n\nTo make a payment, please use the following link\x20👇`,
+        } days\n<b>Amount</b>: ${total} rub.\n\nTo make a payment, please use the following link\xA0👇`,
         {
           reply_markup: {
             inline_keyboard: [

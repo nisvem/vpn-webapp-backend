@@ -1,7 +1,5 @@
 import { config } from 'dotenv';
-import { text } from 'express';
 import { Bot, InlineKeyboard } from 'grammy';
-import user from './models/user';
 
 config();
 
@@ -37,7 +35,7 @@ bot.command('start', async (ctx) => {
   });
 
   await ctx.reply(
-    `Hi!\x20👋 \n\nTo get started and receive your server key or manage these please click on the menu on the sidebar\x20🔑, or click here to access the web app\x20👇`,
+    `Hi!\xA0👋 \n\nTo get started and receive your server key or manage these please click on the menu on the\xA0sidebar\xA0🔑, or click here to access the web app\xA0👇`,
     {
       reply_markup: keyboard,
     }

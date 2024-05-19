@@ -14,6 +14,9 @@ const server: Schema = new Schema({
   price: { type: Number, required: true },
 
   URL: { type: String, required: true },
+  IP_SERVER: { type: String, required: true },
+  PORT_FROM: { type: Number, required: true },
+  PORT_TO: { type: Number, required: true },
   FINGERPRINT: { type: String, required: true },
 });
 
@@ -32,6 +35,9 @@ export interface IServer {
 
   URL: string;
   FINGERPRINT: string;
+  IP_SERVER: string;
+  PORT_FROM: number;
+  PORT_TO: number;
 }
 
 export default model<IServer>('server', server);

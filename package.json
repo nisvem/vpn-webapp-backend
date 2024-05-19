@@ -23,6 +23,7 @@
     "grammy": "^1.23.0",
     "mongodb": "^6.5.0",
     "mongoose": "^8.3.2",
+    "net": "^1.0.2",
     "nodemon": "^3.1.0",
     "outlinevpn-api": "^2.3.0",
     "tsx": "^4.10.2",

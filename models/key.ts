@@ -11,6 +11,7 @@ const key: Schema = new Schema({
   isOpen: { type: Boolean, required: true },
   user: { type: Schema.Types.ObjectId, required: true, ref: 'user' },
   server: { type: Schema.Types.ObjectId, ref: 'server' },
+  portForKey: { type: Number, required: true },
 
   lastPayment: { type: Date, required: false },
   nextPayment: { type: Date, required: false },
@@ -26,6 +27,7 @@ export interface IKey {
   isOpen: boolean;
   user: IUser;
   server: IServer;
+  portForKey: number;
 
   lastPayment: Date;
   nextPayment: Date;

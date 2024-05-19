@@ -32,9 +32,9 @@ routerPayment.post('/callbackPayment', async (req, res) => {
     !key.isOpen && (await enableKey(key._id));
     await bot.api.sendMessage(
       key.user.telegramId,
-      `Payment was successful\x20✅. Your key ${
+      `Payment was successful\xA0✅. Your key ${
         key.name
-      }\x20🔑 for the server "${key.server.name} (${
+      }\xA0🔑 for the server "${key.server.name} (${
         key.server.country
       } ${getUnicodeFlagIcon(
         key.server.abbreviatedCountry
