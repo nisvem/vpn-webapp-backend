@@ -444,10 +444,7 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
           key.server.abbreviatedCountry
         )})\n<b>Payment period</b>: ${
           tariff.days
-        } days\n<b>Next payment</b>:${date.format(
-          date.addDays(new Date(), Number(tariff.days)),
-          'D MMMM YYYY'
-        )}\n<b>Amount</b>: ${total} rub.\n\nTo make a payment, please use the following link 👇`,
+        } days\n<b>Amount</b>: ${total} rub.\n\nTo make a payment, please use the following link 👇`,
         {
           reply_markup: {
             inline_keyboard: [
