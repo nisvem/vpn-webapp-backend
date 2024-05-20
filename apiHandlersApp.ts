@@ -359,6 +359,7 @@ routerApp.post(
         server: server._id,
         portForKey: port,
         currentPrice: server.price,
+        dateOfCreated: new Date(),
         nextPayment: new Date(),
       });
 

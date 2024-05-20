@@ -1,4 +1,3 @@
-import { config } from 'dotenv';
 import { YooCheckout, ICreatePayment } from '@a2seven/yoo-checkout';
 import { v4 as uuidv4 } from 'uuid';
 import { IKey } from '../models/key';
@@ -39,8 +38,10 @@ export async function createPayment(
       createPayload,
       idempotence_key
     );
+
     return payment.confirmation.confirmation_url;
   } catch (error) {
     console.error(error);
+    throw new Error();
   }
 }

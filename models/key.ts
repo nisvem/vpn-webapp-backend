@@ -12,6 +12,7 @@ const key: Schema = new Schema({
   user: { type: Schema.Types.ObjectId, required: true, ref: 'user' },
   server: { type: Schema.Types.ObjectId, ref: 'server' },
   portForKey: { type: Number, required: true },
+  dateOfCreated: { type: Date, required: true },
 
   lastPayment: { type: Date, required: false },
   nextPayment: { type: Date, required: false },
@@ -28,6 +29,7 @@ export interface IKey {
   user: IUser;
   server: IServer;
   portForKey: number;
+  dateOfCreated: Date;
 
   lastPayment: Date;
   nextPayment: Date;
