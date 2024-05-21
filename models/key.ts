@@ -11,7 +11,7 @@ const key: Schema = new Schema({
   isOpen: { type: Boolean, required: true },
   user: { type: Schema.Types.ObjectId, required: true, ref: 'user' },
   server: { type: Schema.Types.ObjectId, ref: 'server' },
-  portForKey: { type: Number, required: true },
+  portForKey: { type: Number, required: false },
   dateOfCreated: { type: Date, required: false },
 
   lastPayment: { type: Date, required: false },
