@@ -4,7 +4,7 @@ import date from 'date-and-time';
 import { checkOpenToRegister, dataLimitWhenDisable } from './helpers';
 
 import { OutlineVPN } from 'outlinevpn-api';
-import { bot } from '../bot';
+import { bot } from '../bot/bot';
 import User from '../models/user';
 import Key, { IKey } from '../models/key';
 import Server from '../models/server';

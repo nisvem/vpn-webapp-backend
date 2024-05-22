@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { OutlineVPN } from 'outlinevpn-api';
-import { bot } from '../bot';
+import { bot } from '../bot/bot';
 import User, { IUser } from '../models/user';
 import Key, { IKey } from '../models/key';
 import { IServer } from '../models/server';

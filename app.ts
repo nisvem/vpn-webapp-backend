@@ -5,7 +5,7 @@ import fs from 'fs';
 import https from 'https';
 import cors from 'cors';
 
-import { bot } from './bot';
+import { bot } from './bot/bot';
 import apiHandlersApp from './apiHandlersApp';
 import apiHandlersPayment from './apiHandlersPayment';
 import startCron from './helpers/crons';

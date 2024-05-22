@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import date from 'date-and-time';
 import { enableKey } from './helpers/helpers.js';
-import { bot } from './bot.js';
+import { bot } from './bot/bot.js';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 
 import Key from './models/key';

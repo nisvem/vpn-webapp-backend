@@ -12,7 +12,7 @@ import {
   dataLimitWhenDisable,
   findAvailablePort,
 } from './helpers/helpers.js';
-import { bot } from './bot.js';
+import { bot } from './bot/bot.js';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 
 import User from './models/user';
@@ -92,6 +92,7 @@ routerApp.get('/getAllKeys', checkAccessAdmin, async (req, res) => {
       .populate('user')
       .populate('server', 'name country abbreviatedCountry')
       .exec();
+
     res.json(keys);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -178,6 +179,9 @@ routerApp.get('/getDataUsage/:id', checkAccess, async (req, res) => {
       fingerprint: key.server.FINGERPRINT,
     });
 
+    // const users = await outlinevpn.getUsers();
+    // console.log(users);
+
     try {
       const dataUsage = await outlinevpn.getDataUserUsage(key.id);
       res.json({ bytes: dataUsage });
@@ -217,13 +221,11 @@ routerApp.post('/createUser', checkAccess, async (req, res) => {
 
     const data = req.body,
       user = new User({
-        _id: new mongoose.Types.ObjectId(),
         username: data?.username || '',
         telegramId: telegramId,
         phoneNumber: data?.phoneNumber || '',
         name: data?.name || '',
         surname: data?.surname || '',
-        dateOfCreateUser: new Date(),
         lastViewedApp: new Date(),
       });
 
@@ -240,7 +242,7 @@ routerApp.post('/updateUser', checkAccess, async (req, res) => {
     const data = req.body;
     const user = await User.findOne(
       { telegramId: data.telegramId },
-      'telegramId name username phoneNumber surname keys isAdmin isLimitedToCreate maxKeyAvalible'
+      'telegramId name username phoneNumber surname keys isAdmin isLimitedToCreate maxKeyAvalible lang'
     );
     if (!user) throw new Error("The user doesn't exist.");
 

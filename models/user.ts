@@ -4,18 +4,19 @@ import { IKey } from './key';
 const user: Schema = new Schema({
   username: { type: String, required: false, default: '' },
   telegramId: { type: String, required: true, unique: true },
+  lang: { type: String, required: false, default: 'en' },
 
   phoneNumber: { type: String, required: false },
 
   isAdmin: { type: Boolean, required: true, default: false },
   isLimitedToCreate: { type: Boolean, required: true, default: false },
-  maxKeyAvalible: { type: Number, required: true, default: 2 },
+  maxKeyAvalible: { type: Number, required: false, default: 2 },
 
   name: { type: String, required: false },
   surname: { type: String, required: false },
 
   lastViewedApp: { type: Date, required: false },
-  dateOfCreateUser: { type: Date, required: false },
+  dateOfCreateUser: { type: Date, required: false, default: new Date() },
 
   keys: [{ type: Schema.Types.ObjectId, ref: 'key' }],
 });

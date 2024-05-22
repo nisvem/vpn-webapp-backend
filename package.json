@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
+    "@grammyjs/files": "^1.1.0",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
     "country-flag-icons": "^1.5.11",
@@ -21,6 +22,8 @@
     "express": "^4.19.2",
     "express-validator": "^7.0.1",
     "grammy": "^1.23.0",
+    "i18next": "^23.11.5",
+    "i18next-fs-backend": "^2.3.1",
     "mongodb": "^6.5.0",
     "mongoose": "^8.3.2",
     "net": "^1.0.2",
