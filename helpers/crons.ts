@@ -9,8 +9,10 @@ import User from '../models/user';
 import Key, { IKey } from '../models/key';
 import Server from '../models/server';
 import { HydratedDocument } from 'mongoose';
+import i18next from '../lang';
 
 async function checkExpiredKeys(key: HydratedDocument<IKey>) {
+  i18next.changeLanguage(key.user?.lang || 'en');
   if (key.nextPayment < new Date()) {
     console.log(
       `- Key "${key.name}" (${key._id}) of @${key.user.name} (${
@@ -23,10 +25,10 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
 
       await bot.api.sendMessage(
         key.user.telegramId,
-        `Your Key "${key.name}"\xA0🔑 is expired (${date.format(
-          key.nextPayment,
-          'DD/MM/YYYY'
-        )}). To reactivate Key, please make a payment.`,
+        i18next.t('key_expired', {
+          name: key.name,
+          date: date.format(key.nextPayment, 'DD/MM/YYYY'),
+        }),
         {
           reply_markup: {
             inline_keyboard: [
@@ -53,10 +55,10 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
 
       await bot.api.sendMessage(
         key.user.telegramId,
-        `Your Key "${key.name}"\xA0🔑 has expired (${date.format(
-          key.nextPayment,
-          'DD/MM/YYYY'
-        )}) and has been deleted\xA0🗑️. To create new Key click on the menu on the sidebar\xA0🔑, or click here to access the web app\xA0👇.`,
+        i18next.t('key_expired_and_delete', {
+          name: key.name,
+          date: date.format(key.nextPayment, 'DD/MM/YYYY'),
+        }),
         {
           reply_markup: {
             inline_keyboard: [

@@ -8,6 +8,7 @@ import { HydratedDocument } from 'mongoose';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 import { ObjectId } from 'mongodb';
 import net from 'net';
+import i18next from '../lang';
 
 type Middleware = (
   req: Request,
@@ -123,6 +124,8 @@ export async function disableKey(id: ObjectId) {
 
   if (!key) throw new Error("The key doesn't exist.");
 
+  i18next.changeLanguage(key.user?.lang || 'en');
+
   const outlinevpn = new OutlineVPN({
     apiUrl: key.server.URL,
     fingerprint: key.server.FINGERPRINT,
@@ -132,11 +135,12 @@ export async function disableKey(id: ObjectId) {
     await outlinevpn.addDataLimit(key.id, dataLimitWhenDisable);
     await bot.api.sendMessage(
       key.user.telegramId,
-      `Your key <b>"${key.name}"</b>\xA0🔑 for server <b>"${key.server.name} (${
-        key.server.country
-      } ${getUnicodeFlagIcon(
-        key.server.abbreviatedCountry
-      )})"</b> has been deactivated\xA0⛔️.`,
+      i18next.t('key_deactivated', {
+        name: key.name,
+        server: `"${key.server.name} (${
+          key.server.country
+        } ${getUnicodeFlagIcon(key.server.abbreviatedCountry)})"`,
+      }),
       {
         parse_mode: 'HTML',
       }
@@ -156,6 +160,8 @@ export async function enableKey(id: ObjectId) {
 
   if (!key) throw new Error("The key doesn't exist.");
 
+  i18next.changeLanguage(key.user?.lang || 'en');
+
   const outlinevpn = new OutlineVPN({
     apiUrl: key.server.URL,
     fingerprint: key.server.FINGERPRINT,
@@ -164,11 +170,12 @@ export async function enableKey(id: ObjectId) {
   try {
     await bot.api.sendMessage(
       key.user.telegramId,
-      `Your key <b>"${key.name}"</b> 🗝️ for server <b>"${key.server.name} (${
-        key.server.country
-      } ${getUnicodeFlagIcon(
-        key.server.abbreviatedCountry
-      )})"</b> has been activated\xA0✅.`,
+      i18next.t('key_activated', {
+        name: key.name,
+        server: `"${key.server.name} (${
+          key.server.country
+        } ${getUnicodeFlagIcon(key.server.abbreviatedCountry)})"`,
+      }),
       {
         parse_mode: 'HTML',
       }

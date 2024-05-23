@@ -25,6 +25,7 @@ export interface IUser {
   _id: Types.ObjectId;
   username: string;
   telegramId: string;
+  lang: string;
 
   phoneNumber: string;
 

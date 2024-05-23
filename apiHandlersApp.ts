@@ -21,6 +21,7 @@ import Server from './models/server';
 import Tariff from './models/tariff';
 import mongoose, { Error } from 'mongoose';
 import { createPayment } from './helpers/payment';
+import i18next from './lang';
 
 const routerApp = Router();
 
@@ -370,14 +371,19 @@ routerApp.post(
 
       await key.save();
       await checkOpenToRegister(user, server);
+      i18next.changeLanguage(user?.lang || 'en');
 
       await bot.api.sendMessage(
         user.telegramId,
-        `Your Key "${key.name}"\xA0🔑  for server "${server.name} (${
-          server.country
-        } ${getUnicodeFlagIcon(
-          server.abbreviatedCountry
-        )})" has been created\xA0✅.\nTo get started, choose a suitable plan and make the payment.`
+        i18next.t('key_сreated', {
+          name: key.name,
+          server: `"${server.name} (${server.country} ${getUnicodeFlagIcon(
+            server.abbreviatedCountry
+          )})"`,
+        }),
+        {
+          parse_mode: 'HTML',
+        }
       );
 
       res.status(200).json({ user, key });
@@ -394,6 +400,8 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
     const key = await Key.findById(keyId).populate('user server').exec();
 
     if (!key) throw new Error("The key doesn't exist.");
+
+    i18next.changeLanguage(key.user?.lang || 'en');
 
     const user = await User.findById(key.user).populate('keys').exec();
     const server = await Server.findById(key.server).populate('keys').exec();
@@ -415,11 +423,15 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
 
     await bot.api.sendMessage(
       key.user.telegramId,
-      `Your Key "${key.name}"\xA0🔑  for server "${key.server.name} (${
-        key.server.country
-      } ${getUnicodeFlagIcon(
-        key.server.abbreviatedCountry
-      )})" has been deleted\xA0🗑️.`
+      i18next.t('key_deleted', {
+        name: key.name,
+        server: `${key.server.name} (${key.server.country} ${getUnicodeFlagIcon(
+          key.server.abbreviatedCountry
+        )})`,
+      }),
+      {
+        parse_mode: 'HTML',
+      }
     );
 
     res.status(200).json(user);
@@ -434,11 +446,13 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
   const tariffId = req.body.tariffId;
 
   try {
-    const key = await Key.findById(keyId).populate('server').exec();
+    const key = await Key.findById(keyId).populate('server user').exec();
     const tariff = await Tariff.findById(tariffId).exec();
 
     if (!key) throw new Error("The key doesn't exist.");
     if (!tariff) throw new Error("The tariff doesn't exist.");
+
+    i18next.changeLanguage(key.user?.lang || 'en');
 
     const total = !tariff.discountPercentage
       ? ((key.currentPrice * tariff.days) / 30).toFixed(2)
@@ -453,19 +467,20 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
     if (url)
       await bot.api.sendMessage(
         telegramId,
-        `<b>Key name</b>: ${key.name}\n<b>Server</b>: ${key.server.name} (${
-          key.server.country
-        } ${getUnicodeFlagIcon(
-          key.server.abbreviatedCountry
-        )})\n<b>Payment period</b>: ${
-          tariff.days
-        } days\n<b>Amount</b>: ${total} rub.\n\nTo make a payment, please use the following link\xA0👇`,
+        i18next.t('message_for_payment', {
+          name: key.name,
+          server: `${key.server.name} (${
+            key.server.country
+          } ${getUnicodeFlagIcon(key.server.abbreviatedCountry)})`,
+          days: tariff.days,
+          total: total,
+        }),
         {
           reply_markup: {
             inline_keyboard: [
               [
                 {
-                  text: 'Pay',
+                  text: i18next.t('pay'),
                   url: url,
                 },
               ],
@@ -477,10 +492,7 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
 
     res.status(200).json();
   } catch (error: any) {
-    await bot.api.sendMessage(
-      telegramId,
-      'Something went wrong! Text me @nisvem for fix it!'
-    );
+    await bot.api.sendMessage(telegramId, i18next.t('error'));
     res.status(500).json({ error: error.message });
   }
 });

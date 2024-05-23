@@ -1,6 +1,15 @@
 {
   "welcome": "Hi!\u00A0👋 \n\nTo get started and receive your server key or manage them, click on the menu on the sidebar\u00A0🔑, or click here to access the web app\u00A0👇",
-  "language_changed": "Language has been changed to English.",
   "btn_menu": "Keys\u00A0🔑",
-  "loading": "Loading ..."
+  "loading": "Loading ...",
+  "key_expired": "Your key \"{{name}}\"\u00A0🔑 has expired ({{date}}). To reactivate the key, please make a payment.",
+  "key_expired_and_delete": "Your key \"{{name}}\"\u00A0🔑 has expired ({{date}}) and has been deleted\u00A0🗑️. To create a new key, click on the menu on the sidebar\u00A0🔑, or click here to access the web app\u00A0👇.",
+  "key_deactivated": "Your key <b>\"{{name}}\"</b>\u00A0🔑 for the server <b>{{server}}</b> has been deactivated\u00A0⛔️.",
+  "key_activated": "Your key <b>\"{{name}}\"</b>\u00A0🔑 for the server <b>{{server}}</b> has been activated\u00A0✅.",
+  "payment_successful": "Payment has been received\u00A0✅. Your key {{name}}\u00A0🔑 for the server {{server}} has been extended by {{days}} days.\n\nNext payment {{nextPayment}}.",
+  "error": "Something went wrong. Please contact me to resolve the issue @nisvem!",
+  "message_for_payment": "<b>Key</b>: {{name}}\n<b>Server</b>: {{server}}\n<b>Payment period</b>: {{days}} days\n<b>Amount</b>: {{total}} RUB.\n\nTo make a payment, click the \"Pay\" button\u00A0👇",
+  "pay": "Pay",
+  "key_deleted": "Your key <b>\"{{name}}\"</b>\u00A0🔑 for the server <b>{{server}}</b> has been deleted\u00A0🗑️.",
+  "key_сreated": "Your key <b>\"{{name}}\"</b>\u00A0🔑 for the server <b>{{server}}</b> has been created\u00A0✅\nTo start using it, choose a plan and make a payment."
 }

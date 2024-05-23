@@ -5,6 +5,7 @@ import { bot } from './bot/bot.js';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 
 import Key from './models/key';
+import i18next from './lang/';
 
 const routerPayment = Router();
 
@@ -23,6 +24,8 @@ routerPayment.post('/callbackPayment', async (req, res) => {
     return res.status(400).json({ error: 'Invalid request body' });
   }
 
+  i18next.changeLanguage(key.user?.lang || 'en');
+
   try {
     const newDate = key.nextPayment > new Date() ? key.nextPayment : new Date();
     key.lastPayment = new Date();
@@ -32,26 +35,21 @@ routerPayment.post('/callbackPayment', async (req, res) => {
     !key.isOpen && (await enableKey(key._id));
     await bot.api.sendMessage(
       key.user.telegramId,
-      `Payment was successful\xA0✅. Your key ${
-        key.name
-      }\xA0🔑 for the server "${key.server.name} (${
-        key.server.country
-      } ${getUnicodeFlagIcon(
-        key.server.abbreviatedCountry
-      )})" has been extended for ${days} days.\n\nThe next payment date is ${date.format(
-        key.nextPayment,
-        'D MMMM YYYY'
-      )}.`
+      i18next.t('payment_successful', {
+        name: key.name,
+        server: `"${key.server.name} (${
+          key.server.country
+        } ${getUnicodeFlagIcon(key.server.abbreviatedCountry)})"`,
+        days: days,
+        nextPayment: `${date.format(key.nextPayment, 'D MMMM YYYY')}`,
+      })
     );
 
     res.status(200).json({ message: 'Success' });
   } catch (error: any) {
     console.error('Error processing payment callback:', error);
 
-    await bot.api.sendMessage(
-      telegramId,
-      'Something went wrong! Text me @nisvem for fix it!'
-    );
+    await bot.api.sendMessage(telegramId, i18next.t('error'));
     res.status(500).json({ error: error.message });
   }
 });
