@@ -12,14 +12,12 @@ import { HydratedDocument } from 'mongoose';
 import i18next from '../lang';
 
 async function checkExpiredKeys(key: HydratedDocument<IKey>) {
+  const day = 1000 * 60 * 60 * 24;
+  const daysForDeleted = day * 7;
+  const daysExpired = new Date().getTime() - key.nextPayment.getTime();
+
   i18next.changeLanguage(key.user?.lang || 'en');
   if (key.nextPayment < new Date()) {
-    console.log(
-      `- Key "${key.name}" (${key._id}) of @${key.user.name} (${
-        key.user.telegramId
-      }) is expired (${date.format(key.nextPayment, 'DD/MM/YYYY HH:mm:ss')})`
-    );
-
     if (key.isOpen) {
       await disableKey(key);
 
@@ -45,12 +43,17 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
         }
       );
 
-      console.log(`Key ${key._id} has disabled!`);
+      console.log(
+        `- Key "${key.name}" (${key._id}) of @${key.user.name} (${
+          key.user.telegramId
+        }) is expired (${date.format(
+          key.nextPayment,
+          'DD/MM/YYYY HH:mm:ss'
+        )}) and has disabled!`
+      );
     }
 
-    const week = 1000 * 60 * 60 * 24 * 7;
-
-    if (new Date().getTime() - key.nextPayment.getTime() > week) {
+    if (key.nextPayment < new Date() && daysExpired > daysForDeleted) {
       await daleteKey(key);
 
       await bot.api.sendMessage(
@@ -76,6 +79,35 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
       );
 
       console.log(`Key ${key._id} has deleted!`);
+      return;
+    } else if (
+      key.nextPayment < new Date() &&
+      daysExpired < daysForDeleted - day
+    ) {
+      await bot.api.sendMessage(
+        key.user.telegramId,
+        i18next.t('key_expired_and_will_be_deleted', {
+          name: key.name,
+          date: date.format(key.nextPayment, 'DD/MM/YYYY'),
+        }),
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '🔑 Keys',
+                  web_app: {
+                    url: process.env.URL_WEBAPP || '',
+                  },
+                },
+              ],
+            ],
+          },
+        }
+      );
+
+      console.log(`Key ${key._id} will be deleted tomorow!`);
+      return;
     }
   } else {
     console.log(

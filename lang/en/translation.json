@@ -1,5 +1,5 @@
 {
-  "welcome": "Hi!\u00A0👋 \n\nTo get started and receive your server key or manage them, click on the menu on the sidebar\u00A0🔑, or click here to access the web app\u00A0👇",
+  "welcome": "Hi!\u00A0👋\n\nWelcome to the bot for obtaining VPN server keys via the Outline app\u00A0🔑.\n\nBenefits:\n🌐\u00A0Data security: Your data is never shared with anyone.\n⚡\u00A0Speed: No speed limits on your connection.\n🚀\u00A0No restrictions: Full internet freedom with no traffic limits and access to any resources.\n\n🙋‍♂️\u00A0If something goes wrong, always ready to help. Just write to me @nisvem!\n\nTo get started, click on the sidebar menu\u00A0🔑 or click here to open the web app\u00A0👇",
   "btn_menu": "Keys\u00A0🔑",
   "loading": "Loading ...",
   "key_expired": "Your key \"{{name}}\"\u00A0🔑 has expired ({{date}}). To reactivate the key, please make a payment.",
@@ -11,5 +11,6 @@
   "message_for_payment": "<b>Key</b>: {{name}}\n<b>Server</b>: {{server}}\n<b>Payment period</b>: {{days}} days\n<b>Amount</b>: {{total}} RUB.\n\nTo make a payment, click the \"Pay\" button\u00A0👇",
   "pay": "Pay",
   "key_deleted": "Your key <b>\"{{name}}\"</b>\u00A0🔑 for the server <b>{{server}}</b> has been deleted\u00A0🗑️.",
-  "key_сreated": "Your key <b>\"{{name}}\"</b>\u00A0🔑 for the server <b>{{server}}</b> has been created\u00A0✅\nTo start using it, choose a plan and make a payment."
+  "key_сreated": "Your key <b>\"{{name}}\"</b>\u00A0🔑 for the server <b>{{server}}</b> has been created\u00A0✅\nTo start using it, choose a plan and make a payment.",
+  "key_expired_and_will_be_deleted": "Your key \"{{name}}\"\u00A0🔑 has expired ({{date}}). The key will be deleted tomorrow. To activate the key, please make a payment."
 }
