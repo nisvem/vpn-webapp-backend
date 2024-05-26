@@ -53,7 +53,7 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
       );
     }
 
-    if (key.nextPayment < new Date() && daysExpired > daysForDeleted) {
+    if (key.nextPayment < new Date() && daysExpired >= daysForDeleted) {
       await daleteKey(key);
 
       await bot.api.sendMessage(
@@ -80,35 +80,37 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
 
       console.log(`Key ${key._id} has deleted!`);
       return;
-    } else if (
-      key.nextPayment < new Date() &&
-      daysExpired < daysForDeleted - day
-    ) {
-      await bot.api.sendMessage(
-        key.user.telegramId,
-        i18next.t('key_expired_and_will_be_deleted', {
-          name: key.name,
-          date: date.format(key.nextPayment, 'DD/MM/YYYY'),
-        }),
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: '🔑 Keys',
-                  web_app: {
-                    url: process.env.URL_WEBAPP || '',
-                  },
-                },
-              ],
-            ],
-          },
-        }
-      );
-
-      console.log(`Key ${key._id} will be deleted tomorow!`);
-      return;
     }
+
+    // if (
+    //   key.nextPayment < new Date() &&
+    //   daysExpired - daysForDeleted === day
+    // ) {
+    //   await bot.api.sendMessage(
+    //     key.user.telegramId,
+    //     i18next.t('key_expired_and_will_be_deleted', {
+    //       name: key.name,
+    //       date: date.format(key.nextPayment, 'DD/MM/YYYY'),
+    //     }),
+    //     {
+    //       reply_markup: {
+    //         inline_keyboard: [
+    //           [
+    //             {
+    //               text: '🔑 Keys',
+    //               web_app: {
+    //                 url: process.env.URL_WEBAPP || '',
+    //               },
+    //             },
+    //           ],
+    //         ],
+    //       },
+    //     }
+    //   );
+
+    //   console.log(`Key ${key._id} will be deleted tomorow!`);
+    //   return;
+    // }
   } else {
     console.log(
       `- Key "${key.name}" (${key._id}) of @${key.user.name} (${
