@@ -11,118 +11,6 @@ import Server from '../models/server';
 import { HydratedDocument } from 'mongoose';
 import i18next from '../lang';
 
-async function checkExpiredKeys(key: HydratedDocument<IKey>) {
-  const day = 1000 * 60 * 60 * 24;
-  const daysForDeleted = day * 7;
-  const daysExpired = new Date().getTime() - key.nextPayment.getTime();
-
-  i18next.changeLanguage(key.user?.lang || 'en');
-  if (key.nextPayment < new Date()) {
-    if (key.isOpen) {
-      await disableKey(key);
-
-      await bot.api.sendMessage(
-        key.user.telegramId,
-        i18next.t('key_expired', {
-          name: key.name,
-          date: date.format(key.nextPayment, 'DD/MM/YYYY'),
-        }),
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: 'Keys 🔑',
-                  web_app: {
-                    url: process.env.URL_WEBAPP || '',
-                  },
-                },
-              ],
-            ],
-          },
-        }
-      );
-
-      console.log(
-        `- Key "${key.name}" (${key._id}) of @${key.user.name} (${
-          key.user.telegramId
-        }) is expired (${date.format(
-          key.nextPayment,
-          'DD/MM/YYYY HH:mm:ss'
-        )}) and has disabled!`
-      );
-    }
-
-    if (key.nextPayment < new Date() && daysExpired >= daysForDeleted) {
-      await daleteKey(key);
-
-      await bot.api.sendMessage(
-        key.user.telegramId,
-        i18next.t('key_expired_and_delete', {
-          name: key.name,
-          date: date.format(key.nextPayment, 'DD/MM/YYYY'),
-        }),
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: '🔑 Keys',
-                  web_app: {
-                    url: process.env.URL_WEBAPP || '',
-                  },
-                },
-              ],
-            ],
-          },
-        }
-      );
-
-      console.log(`Key ${key._id} has deleted!`);
-      return;
-    }
-
-    // if (
-    //   key.nextPayment < new Date() &&
-    //   daysExpired - daysForDeleted === day
-    // ) {
-    //   await bot.api.sendMessage(
-    //     key.user.telegramId,
-    //     i18next.t('key_expired_and_will_be_deleted', {
-    //       name: key.name,
-    //       date: date.format(key.nextPayment, 'DD/MM/YYYY'),
-    //     }),
-    //     {
-    //       reply_markup: {
-    //         inline_keyboard: [
-    //           [
-    //             {
-    //               text: '🔑 Keys',
-    //               web_app: {
-    //                 url: process.env.URL_WEBAPP || '',
-    //               },
-    //             },
-    //           ],
-    //         ],
-    //       },
-    //     }
-    //   );
-
-    //   console.log(`Key ${key._id} will be deleted tomorow!`);
-    //   return;
-    // }
-  } else {
-    console.log(
-      `- Key "${key.name}" (${key._id}) of @${key.user.name} (${
-        key.user.telegramId
-      }) is not expired (${date.format(
-        key.nextPayment,
-        'YYYY/MM/DD HH:mm:ss'
-      )})`
-    );
-  }
-}
-
 async function disableKey(key: HydratedDocument<IKey>) {
   try {
     const outlinevpn = new OutlineVPN({
@@ -172,7 +60,6 @@ async function startCron() {
       console.log(
         `Cron started at ${date.format(new Date(), 'DD/MM/YYYY HH:mm:ss')}`
       );
-
       const keys = await Key.find()
         .populate({
           path: 'server',
@@ -183,9 +70,7 @@ async function startCron() {
           model: 'user',
         })
         .exec();
-
       if (!keys) throw new Error('Something wrong with KEYS!');
-
       keys.forEach(async (key) => {
         try {
           await checkExpiredKeys(key);
@@ -193,7 +78,6 @@ async function startCron() {
           throw new Error(error);
         }
       });
-
       console.log(
         `Cron finished at ${date.format(new Date(), 'DD/MM/YYYY HH:mm:ss')}`
       );
@@ -201,6 +85,109 @@ async function startCron() {
     null,
     true
   );
+}
+
+async function checkExpiredKeys(key: HydratedDocument<IKey>) {
+  i18next.changeLanguage(key.user?.lang || 'en');
+
+  if (key.nextPayment < new Date() && key.isOpen) {
+    await disableKey(key);
+    cronNotify(key);
+
+    console.log(
+      `- Key "${key.name}" (${key._id}) of @${key.user.name} (${
+        key.user.telegramId
+      }) is expired (${date.format(
+        key.nextPayment,
+        'DD/MM/YYYY HH:mm:ss'
+      )}) and has disabled!`
+    );
+  } else {
+    console.log(
+      `- Key "${key.name}" (${key._id}) of @${key.user.name} (${
+        key.user.telegramId
+      }) is not expired (${date.format(
+        key.nextPayment,
+        'YYYY/MM/DD HH:mm:ss'
+      )})`
+    );
+  }
+}
+
+function cronNotify(key: HydratedDocument<IKey>) {
+  try {
+    const dateOfNotify = date.addDays(new Date(), 4);
+
+    new cron.CronJob(
+      dateOfNotify,
+      async () => {
+        if (key.nextPayment < new Date() && key._id && !key.isOpen) {
+          console.log(
+            `Cron notify started for key ${key.name} (${key.user.telegramId})`
+          );
+
+          await bot.api.sendMessage(
+            key.user.telegramId,
+            i18next.t('key_expired_and_will_be_deleted', {
+              name: key.name,
+              date: date.format(key.nextPayment, 'DD/MM/YYYY'),
+            })
+          );
+
+          cronDeleted(key);
+        }
+      },
+      null,
+      true
+    );
+  } catch {
+    console.log('Errow in cronNotify');
+  }
+}
+
+function cronDeleted(key: HydratedDocument<IKey>) {
+  try {
+    const dateOfDelete = date.addDays(new Date(), 1);
+
+    new cron.CronJob(
+      dateOfDelete,
+      async () => {
+        if (key.nextPayment < new Date() && key._id && !key.isOpen) {
+          console.log(
+            `Cron deleted started for key ${key.name} (${key.user.telegramId})`
+          );
+
+          await daleteKey(key);
+
+          await bot.api.sendMessage(
+            key.user.telegramId,
+            i18next.t('key_expired_and_delete', {
+              name: key.name,
+              date: date.format(key.nextPayment, 'DD/MM/YYYY'),
+            }),
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: '🔑 Keys',
+                      web_app: {
+                        url: process.env.URL_WEBAPP || '',
+                      },
+                    },
+                  ],
+                ],
+              },
+            }
+          );
+        }
+      },
+      null,
+      true
+    );
+  } catch {
+    console.log('Errow in cronDeleted');
+  }
 }
 
 export default startCron;

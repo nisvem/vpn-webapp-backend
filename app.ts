@@ -39,6 +39,7 @@ const start = async () => {
         console.log(`App server started on port ${process.env.PORT}`);
       });
       bot.start();
+      await startCron();
     } else {
       app.listen(process.env.PORT || 3000, () => {
         console.log(`App server started on port ${process.env.PORT}`);
