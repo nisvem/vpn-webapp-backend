@@ -16,7 +16,7 @@ const user: Schema = new Schema({
   surname: { type: String, required: false },
 
   lastViewedApp: { type: Date, required: false },
-  dateOfCreateUser: { type: Date, required: false, default: new Date() },
+  dateOfCreateUser: { type: Date, required: false },
 
   keys: [{ type: Schema.Types.ObjectId, ref: 'key' }],
 });
