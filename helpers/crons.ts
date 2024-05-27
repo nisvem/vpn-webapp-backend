@@ -45,6 +45,9 @@ async function daleteKey(key: HydratedDocument<IKey>) {
     user.keys = user.keys.filter((item) => key._id != item._id);
     server.keys = server.keys.filter((item) => key._id != item._id);
 
+    await user.save();
+    await server.save();
+
     await outlinevpn.deleteUser(key.id);
     await checkOpenToRegister(user, server);
     await Key.findByIdAndDelete(key._id);

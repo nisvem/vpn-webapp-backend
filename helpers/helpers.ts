@@ -104,19 +104,32 @@ export async function checkOpenToRegister(
   user: HydratedDocument<IUser>,
   server: HydratedDocument<IServer>
 ) {
-  const outlinevpn = new OutlineVPN({
-    apiUrl: server.URL,
-    fingerprint: server.FINGERPRINT,
-  });
+  try {
+    const outlinevpn = new OutlineVPN({
+      apiUrl: server.URL,
+      fingerprint: server.FINGERPRINT,
+    });
 
-  const usersInOutlineServer = await outlinevpn.getUsers();
+    const usersInOutlineServer = await outlinevpn.getUsers();
 
-  server.nowUsers = usersInOutlineServer.length;
-  server.isOpenToRegister = !!(usersInOutlineServer.length < server.limitUsers);
-  user.isLimitedToCreate = !!(user.keys.length >= user.maxKeyAvalible);
+    server.nowUsers = usersInOutlineServer.length;
+    server.isOpenToRegister = !!(
+      usersInOutlineServer.length < server.limitUsers
+    );
+    user.isLimitedToCreate = !!(user.keys.length >= user.maxKeyAvalible);
 
-  await user.save();
-  await server.save();
+    if (!server.isOpenToRegister) {
+      const userAdmin = await User.find({ isAdmin: true });
+      userAdmin.forEach((user) => {
+        bot.api.sendMessage(user.id, `Server ${server.name} is full!`);
+      });
+    }
+
+    await user.save();
+    await server.save();
+  } catch (error: any) {
+    throw new Error(error);
+  }
 }
 
 export async function disableKey(id: ObjectId) {
