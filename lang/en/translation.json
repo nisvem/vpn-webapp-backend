@@ -12,5 +12,6 @@
   "pay": "Pay",
   "key_deleted": "Your key <b>\"{{name}}\"</b>\u00A0🔑 for the server <b>{{server}}</b> has been deleted\u00A0🗑️.",
   "key_сreated": "Your key <b>\"{{name}}\"</b>\u00A0🔑 for the server <b>{{server}}</b> has been created\u00A0✅\nTo start using it, choose a plan and make a payment.",
-  "key_expired_and_will_be_deleted": "Your key \"{{name}}\"\u00A0🔑 has expired ({{date}}). The key will be deleted tomorrow. To activate the key, please make a payment."
+  "key_expired_and_will_be_deleted": "Your key \"{{name}}\"\u00A0🔑 has expired ({{date}}). The key will be deleted tomorrow. To activate the key, please make a payment.",
+  "key_will_expired_and_deactivated": "Your key \"{{name}}\"\u00A0🔑 will expire tomorrow ({{date}}). To keep the key active, please make a payment."
 }
