@@ -77,6 +77,7 @@ async function startMessage(ctx: MyContext) {
         telegramId: ctx.from?.id,
         surname: ctx.from?.last_name || '',
         lang: ctx.session.lang,
+        dateOfCreateUser: new Date(),
       });
 
       await newUser.save();
