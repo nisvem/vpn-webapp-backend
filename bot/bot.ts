@@ -7,7 +7,6 @@ import User from '../models/user';
 config();
 interface SessionData {
   lang: 'en' | 'ru';
-  startMessage?: number;
 }
 
 type MyContext = Context & SessionFlavor<SessionData>;
@@ -40,8 +39,6 @@ bot.command('start', async (ctx) => {
       },
     }
   );
-
-  ctx.session.startMessage = message.message_id;
 });
 
 bot.callbackQuery('change_eng', async (ctx) => {

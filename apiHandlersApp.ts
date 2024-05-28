@@ -227,8 +227,8 @@ routerApp.post('/createUser', checkAccess, async (req, res) => {
         phoneNumber: data?.phoneNumber || '',
         name: data?.name || '',
         surname: data?.surname || '',
-        dateOfCreateUser: new Date(),
-        lastViewedApp: new Date(),
+        dateOfCreateUser: data?.dateOfCreateUser || new Date(),
+        lastViewedApp: data?.lastViewedApp || new Date(),
       });
 
     await user.save();
