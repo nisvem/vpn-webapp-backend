@@ -97,6 +97,28 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
     await disableKey(key);
     cronNotifyToDelete(key);
 
+    await bot.api.sendMessage(
+      key.user.telegramId,
+      i18next.t('key_expired', {
+        name: key.name,
+        date: date.format(key.nextPayment, 'DD/MM/YYYY'),
+      }),
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: '🔑 Keys',
+                web_app: {
+                  url: process.env.URL_WEBAPP || '',
+                },
+              },
+            ],
+          ],
+        },
+      }
+    );
+    
     console.log(
       `- Key "${key.name}" (${key._id}) of @${key.user.name} (${
         key.user.telegramId
