@@ -13,7 +13,7 @@ import {
   findAvailablePort,
   sendMessage
 } from './helpers/helpers.js';
-import { bot } from './bot/bot.js';
+
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 
 import User from './models/user';
@@ -440,6 +440,9 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
     server.keys = server.keys.filter((key) => key._id != keyId);
 
     await Key.findByIdAndDelete(keyId);
+
+    await user.save();
+    await server.save();
 
     await sendMessage(
       key.user.telegramId,
