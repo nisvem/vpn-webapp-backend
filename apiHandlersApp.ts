@@ -425,17 +425,21 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
     if (!server) throw new Error("The server doesn't exist.");
     if (!user) throw new Error("The user doesn't exist.");
 
-    const outlinevpn = new OutlineVPN({
-      apiUrl: server.URL,
-      fingerprint: server.FINGERPRINT,
-    });
+    try {
+      const outlinevpn = new OutlineVPN({
+        apiUrl: server.URL,
+        fingerprint: server.FINGERPRINT,
+      });
+      await outlinevpn.deleteUser(key.id);
+      await checkOpenToRegister(user, server);
+    } catch {
+      logger.error(`The server doesn't exist -> ${server.URL}`);
+    }
 
     user.keys = user.keys.filter((key) => key._id != keyId);
     server.keys = server.keys.filter((key) => key._id != keyId);
 
-    await outlinevpn.deleteUser(key.id);
     await Key.findByIdAndDelete(keyId);
-    await checkOpenToRegister(user, server);
 
     await sendMessage(
       key.user.telegramId,
