@@ -29,8 +29,8 @@ async function disableKey(key: HydratedDocument<IKey>) {
     logger.info(`Key ${key.name} of ${key.user.telegramId} disabled`);
     await key.save();
   } catch (error: any) {
-    logger.error(`KeyID: ${key.id}, Function: disableKey(), Error: ${error} `);
-    throw new Error(error);
+    logger.error(`KeyID: ${key.id}, Function: disableKey(), Error: ${error.message} `);
+    throw new Error(error.message);
   }
 }
 
@@ -44,10 +44,15 @@ async function daleteKey(key: HydratedDocument<IKey>) {
     if (!server) throw new Error("The server doesn't exist.");
     if (!user) throw new Error("The user doesn't exist.");
 
-    const outlinevpn = new OutlineVPN({
-      apiUrl: server.URL,
-      fingerprint: server.FINGERPRINT,
-    });
+    try {
+      const outlinevpn = new OutlineVPN({
+        apiUrl: server.URL,
+        fingerprint: server.FINGERPRINT,
+      });
+      await outlinevpn.deleteUser(key.id);
+    } catch {
+      logger.error(`The server doesn't exist -> ${server.URL}`);
+    }
 
     user.keys = user.keys.filter((item) => key._id != item._id);
     server.keys = server.keys.filter((item) => key._id != item._id);
@@ -55,20 +60,19 @@ async function daleteKey(key: HydratedDocument<IKey>) {
     await user.save();
     await server.save();
 
-    await outlinevpn.deleteUser(key.id);
     await checkOpenToRegister(user, server);
     await Key.findByIdAndDelete(key._id);
 
     logger.info(`Key ${key.name} of ${key.user.telegramId} deleted`);
   } catch (error: any) {
-    logger.error(`KeyID: ${key.id}, Function: daleteKey(), Error: ${error} `);
-    throw new Error(error);
+    logger.error(`KeyID: ${key.id}, Function: daleteKey(), Error: ${error.message} `);
+    throw new Error(error.message);
   }
 }
 
 async function startCron() {
   new cron.CronJob(
-    '10 * * * *',
+    '33 * * * *',
     async () => {
       try {
         logger.debug(`Cron started`);
@@ -91,15 +95,14 @@ async function startCron() {
             await checkExpiredKeys(key);
           } catch (error: any) {
             logger.error(
-              `KeyID: ${key.id}, Function: checkExpiredKeys(), Error: ${error} `
+              `KeyID: ${key.id}, Function: checkExpiredKeys(), Error: ${error.message} `
             );
-            throw new Error(error);
+            throw new Error(error.message);
           }
         });
         logger.debug(`Cron finished successful`);
       } catch (error: any) {
-        logger.error(`Cron finished unsuccessful, error: ${error}`);
-        throw new Error('Cron finished unsuccessful!');
+        logger.error(`Cron finished unsuccessful, error: ${error.message}`);
       }
     },
     null,
@@ -113,8 +116,10 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
   if (!key.status) {
     if (key.isOpen && key.nextPayment > new Date()) {
       key.status = 'active';
+      await key.save();
     } else {
       key.status = 'expired';
+      await key.save();
     }
   }
 
@@ -144,6 +149,8 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
     );
     key.status = 'expiresTomorrow';
     key.lastNotification = new Date();
+
+    await key.save();
   } else if (
     (daysUntilExpiration === 0 &&
       key.status === 'expiresTomorrow' &&
@@ -163,6 +170,8 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
     );
     key.status = 'expired';
     key.lastNotification = new Date();
+
+    await key.save();
   } else if (
     daysUntilExpiration === -2 &&
     key.status === 'expired' &&
@@ -178,6 +187,8 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
     );
     key.status = 'willBeDeletedTomorrow';
     key.lastNotification = new Date();
+
+    await key.save();
   } else if (
     daysUntilExpiration === -3 &&
     key.status === 'willBeDeletedTomorrow' &&
