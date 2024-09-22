@@ -68,7 +68,7 @@ async function daleteKey(key: HydratedDocument<IKey>) {
 
 async function startCron() {
   new cron.CronJob(
-    '0 * * * *',
+    '10 * * * *',
     async () => {
       try {
         logger.debug(`Cron started`);
@@ -90,7 +90,7 @@ async function startCron() {
           try {
             await checkExpiredKeys(key);
           } catch (error: any) {
-            logger.debug(
+            logger.error(
               `KeyID: ${key.id}, Function: checkExpiredKeys(), Error: ${error} `
             );
             throw new Error(error);
@@ -98,7 +98,7 @@ async function startCron() {
         });
         logger.debug(`Cron finished successful`);
       } catch (error: any) {
-        logger.debug(`Cron finished unsuccessful, error: ${error}`);
+        logger.error(`Cron finished unsuccessful, error: ${error}`);
         throw new Error('Cron finished unsuccessful!');
       }
     },
