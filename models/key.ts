@@ -13,6 +13,8 @@ const key: Schema = new Schema({
   server: { type: Schema.Types.ObjectId, ref: 'server' },
   portForKey: { type: Number, required: false },
   dateOfCreated: { type: Date, required: false },
+  lastNotification: { type: Date, required: false },
+  status: {type: String, required: false},
 
   lastPayment: { type: Date, required: false },
   nextPayment: { type: Date, required: false },
@@ -30,6 +32,9 @@ export interface IKey {
   server: IServer;
   portForKey: number;
   dateOfCreated: Date;
+
+  status?: 'active'| 'expiresTomorrow' | 'expired' | 'willBeDeletedTomorrow';
+  lastNotification?: Date;
 
   lastPayment: Date;
   nextPayment: Date;

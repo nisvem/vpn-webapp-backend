@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import date from 'date-and-time';
-import { enableKey } from './helpers/helpers.js';
-import { bot } from './bot/bot.js';
+import { enableKey, sendMessage } from './helpers/helpers';
+import {logger} from './helpers/logger';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 
 import Key from './models/key';
@@ -10,7 +10,7 @@ import i18next from './lang/';
 const routerPayment = Router();
 
 routerPayment.post('/callbackPayment', async (req, res) => {
-  console.log('Received request:', req.body);
+  logger.debug(`Received request:`, req.body);
 
   const { object } = req.body;
   const { keyId, days, telegramId } = object.metadata;
@@ -20,7 +20,6 @@ routerPayment.post('/callbackPayment', async (req, res) => {
     .exec();
 
   if (!keyId || !days || !telegramId || !key) {
-    console.error('Invalid request body in /callbackPayment:', req.body);
     return res.status(400).json({ error: 'Invalid request body' });
   }
 
@@ -33,7 +32,7 @@ routerPayment.post('/callbackPayment', async (req, res) => {
     key.save();
 
     !key.isOpen && (await enableKey(key._id));
-    await bot.api.sendMessage(
+    await sendMessage(
       key.user.telegramId,
       i18next.t('payment_successful', {
         name: key.name,
@@ -46,11 +45,13 @@ routerPayment.post('/callbackPayment', async (req, res) => {
     );
 
     res.status(200).json({ message: 'Success' });
+    logger.info(`New payment from ${key.user.telegramId} for '${key.name}'`)
   } catch (error: any) {
-    console.error('Error processing payment callback:', error);
+    logger.error('Error processing payment callback:', error);
 
-    await bot.api.sendMessage(telegramId, i18next.t('error'));
+    await sendMessage(telegramId, i18next.t('error'));
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersPayment -> /callbackPayment', error.message);
   }
 });
 

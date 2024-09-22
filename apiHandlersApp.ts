@@ -11,6 +11,7 @@ import {
   checkAccessApp,
   dataLimitWhenDisable,
   findAvailablePort,
+  sendMessage
 } from './helpers/helpers.js';
 import { bot } from './bot/bot.js';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
@@ -21,6 +22,7 @@ import Server from './models/server';
 import Tariff from './models/tariff';
 import mongoose, { Error } from 'mongoose';
 import { createPayment } from './helpers/payment';
+import {logger} from './helpers/logger';
 import i18next from './lang';
 
 const routerApp = Router();
@@ -34,6 +36,7 @@ routerApp.get('/getTariffs', checkAccess, async (req, res) => {
     res.json(tariffs);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /getTariffs', error.message);
   }
 });
 
@@ -44,6 +47,7 @@ routerApp.get('/getUsers', checkAccessAdmin, async (req, res) => {
     res.json(users);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /getUsers', error.message);
   }
 });
 
@@ -84,6 +88,7 @@ routerApp.get('/getUser/:id', checkAccess, async (req, res) => {
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /getUser/:id', error.message);
   }
 });
 
@@ -97,6 +102,7 @@ routerApp.get('/getAllKeys', checkAccessAdmin, async (req, res) => {
     res.json(keys);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /getAllKeys', error.message);
   }
 });
 
@@ -125,6 +131,7 @@ routerApp.get('/getKeys', checkAccess, async (req, res) => {
     res.json(user?.keys);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /getKeys', error.message);
   }
 });
 
@@ -139,9 +146,11 @@ routerApp.get('/getServers', checkAccess, async (req, res) => {
       res.json(servers);
     } else {
       res.status(500).json({ error: 'No free servers available' });
+      logger.error('apiHandlersApp -> /getServers -> No free servers available');
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /getServers', error.message);
   }
 });
 
@@ -166,6 +175,7 @@ routerApp.get('/getKey/:id', checkAccess, async (req, res) => {
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /getKey/:id', error.message);
   }
 });
 
@@ -180,9 +190,6 @@ routerApp.get('/getDataUsage/:id', checkAccess, async (req, res) => {
       fingerprint: key.server.FINGERPRINT,
     });
 
-    // const users = await outlinevpn.getUsers();
-    // console.log(users);
-
     try {
       const dataUsage = await outlinevpn.getDataUserUsage(key.id);
       res.json({ bytes: dataUsage });
@@ -191,6 +198,7 @@ routerApp.get('/getDataUsage/:id', checkAccess, async (req, res) => {
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /getDataUsage/:id', error.message);
   }
 });
 
@@ -203,6 +211,7 @@ routerApp.post('/disableKey', checkAccessAdmin, async (req, res) => {
     res.json(key);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /disableKey', error.message);
   }
 });
 
@@ -213,6 +222,7 @@ routerApp.post('/enableKey', checkAccessAdmin, async (req, res) => {
     res.json(key);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /enableKey', error.message);
   }
 });
 
@@ -233,9 +243,11 @@ routerApp.post('/createUser', checkAccess, async (req, res) => {
 
     await user.save();
 
+    logger.info('New user -> ', user);
     res.json(user);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /createUser', error.message);
   }
 });
 
@@ -264,6 +276,7 @@ routerApp.post('/updateUser', checkAccess, async (req, res) => {
     res.json(user);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /updateUser', error.message);
   }
 });
 
@@ -288,6 +301,7 @@ routerApp.post('/editUser', checkAccessAdmin, async (req, res) => {
     res.json(user);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /editUser', error.message);
   }
 });
 
@@ -305,6 +319,7 @@ routerApp.post('/editKey', checkAccessAdmin, async (req, res) => {
     res.status(200).json(key);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /editKey', error.message);
   }
 });
 
@@ -332,8 +347,6 @@ routerApp.post(
         server.PORT_FROM,
         server.PORT_TO
       );
-
-      console.log(`Available port found for creating Key: ${port}`);
 
       const outlinevpn = new OutlineVPN({
         apiUrl: server.URL,
@@ -374,7 +387,7 @@ routerApp.post(
       await checkOpenToRegister(user, server);
       i18next.changeLanguage(user?.lang || 'en');
 
-      await bot.api.sendMessage(
+      await sendMessage(
         user.telegramId,
         i18next.t('key_сreated', {
           name: key.name,
@@ -388,8 +401,10 @@ routerApp.post(
       );
 
       res.status(200).json({ user, key });
+      logger.info(`New key ${req.body.name} of ${user.telegramId}`);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
+      logger.error('apiHandlersApp -> /createKey', error.message);
     }
   }
 );
@@ -422,7 +437,7 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
     await Key.findByIdAndDelete(keyId);
     await checkOpenToRegister(user, server);
 
-    await bot.api.sendMessage(
+    await sendMessage(
       key.user.telegramId,
       i18next.t('key_deleted', {
         name: key.name,
@@ -435,9 +450,11 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
       }
     );
 
+    logger.info(`Key ${key.name} of ${key.user.telegramId} deleted`);
     res.status(200).json(user);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /deleteKey', error.message);
   }
 });
 
@@ -466,7 +483,7 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
     const url = await createPayment(telegramId, key, tariff, total);
 
     if (url)
-      await bot.api.sendMessage(
+      await sendMessage(
         telegramId,
         i18next.t('message_for_payment', {
           name: key.name,
@@ -493,8 +510,9 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
 
     res.status(200).json();
   } catch (error: any) {
-    await bot.api.sendMessage(telegramId, i18next.t('error'));
+    await sendMessage(telegramId, i18next.t('error'));
     res.status(500).json({ error: error.message });
+    logger.error('apiHandlersApp -> /getUrlPaymentToChat', error.message);
   }
 });
 

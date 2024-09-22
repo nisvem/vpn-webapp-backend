@@ -4,6 +4,7 @@ import { bot } from '../bot/bot';
 import User, { IUser } from '../models/user';
 import Key, { IKey } from '../models/key';
 import { IServer } from '../models/server';
+import { logger } from './logger';
 import { HydratedDocument } from 'mongoose';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 import { ObjectId } from 'mongodb';
@@ -120,14 +121,17 @@ export async function checkOpenToRegister(
 
     if (!server.isOpenToRegister) {
       const userAdmin = await User.find({ isAdmin: true });
-      userAdmin.forEach((user) => {
-        bot.api.sendMessage(user.id, `Server ${server.name} is full!`);
+      userAdmin.forEach(async (user) => {
+        await sendMessage(user.telegramId, `Server ${server.name} is full!`);
       });
     }
 
     await user.save();
     await server.save();
   } catch (error: any) {
+    logger.error(
+      `TelegramId: ${user.telegramId}, Ошибка в checkOpenToRegister()`
+    );
     throw new Error(error);
   }
 }
@@ -146,7 +150,7 @@ export async function disableKey(id: ObjectId) {
 
   try {
     await outlinevpn.addDataLimit(key.id, dataLimitWhenDisable);
-    await bot.api.sendMessage(
+    await sendMessage(
       key.user.telegramId,
       i18next.t('key_deactivated', {
         name: key.name,
@@ -159,11 +163,14 @@ export async function disableKey(id: ObjectId) {
       }
     );
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
 
   key.isOpen = false;
+  key.status = 'expired';
+
   await key.save();
+  logger.info(`Key ${key.name} of ${key.user.telegramId} disabled`);
 
   return key;
 }
@@ -180,27 +187,27 @@ export async function enableKey(id: ObjectId) {
     fingerprint: key.server.FINGERPRINT,
   });
 
-  try {
-    await bot.api.sendMessage(
-      key.user.telegramId,
-      i18next.t('key_activated', {
-        name: key.name,
-        server: `"${key.server.name} (${
-          key.server.country
-        } ${getUnicodeFlagIcon(key.server.abbreviatedCountry)})"`,
-      }),
-      {
-        parse_mode: 'HTML',
-      }
-    );
-  } catch (e) {
-    console.error(e);
-  }
+  await sendMessage(
+    key.user.telegramId,
+    i18next.t('key_activated', {
+      name: key.name,
+      server: `"${key.server.name} (${key.server.country} ${getUnicodeFlagIcon(
+        key.server.abbreviatedCountry
+      )})"`,
+    }),
+    {
+      parse_mode: 'HTML',
+    }
+  );
 
   await outlinevpn.enableUser(key.id);
+
   key.isOpen = true;
+  key.status = 'active';
 
   await key.save();
+
+  logger.info(`Key ${key.name} of ${key.user.telegramId} activated`);
 
   return key;
 }
@@ -244,5 +251,22 @@ export async function findAvailablePort(
       return port;
     }
   }
+  logger.error('Available port for creating Key not found.', remoteHost);
   throw new Error('Available port for creating Key not found.');
+}
+
+export async function sendMessage(
+  telegramId: string,
+  message: string,
+  reply_markup: any = {}
+) {
+  try {
+    await bot.api.sendMessage(telegramId, message, reply_markup);
+
+    logger.debug(`TelegramId: ${telegramId}, sent message. Text: ${message}`);
+  } catch {
+    logger.error(
+      `TelegramId: ${telegramId}, can't send message. Text: ${message}`
+    );
+  }
 }
