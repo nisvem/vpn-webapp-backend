@@ -50,6 +50,7 @@ async function daleteKey(key: HydratedDocument<IKey>) {
         fingerprint: server.FINGERPRINT,
       });
       await outlinevpn.deleteUser(key.id);
+      await checkOpenToRegister(user, server);
     } catch {
       logger.error(`The server doesn't exist -> ${server.URL}`);
     }
@@ -60,9 +61,7 @@ async function daleteKey(key: HydratedDocument<IKey>) {
     await user.save();
     await server.save();
 
-    await checkOpenToRegister(user, server);
     await Key.findByIdAndDelete(key._id);
-
     logger.info(`Key ${key.name} of ${key.user.telegramId} deleted`);
   } catch (error: any) {
     logger.error(`KeyID: ${key.id}, Function: daleteKey(), Error: ${error.message} `);
@@ -72,7 +71,7 @@ async function daleteKey(key: HydratedDocument<IKey>) {
 
 async function startCron() {
   new cron.CronJob(
-    '33 * * * *',
+    '38 * * * *',
     async () => {
       try {
         logger.debug(`Cron started`);
@@ -97,7 +96,6 @@ async function startCron() {
             logger.error(
               `KeyID: ${key.id}, Function: checkExpiredKeys(), Error: ${error.message} `
             );
-            throw new Error(error.message);
           }
         });
         logger.debug(`Cron finished successful`);
