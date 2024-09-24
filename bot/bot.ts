@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import { Bot, Context, session, SessionFlavor } from 'grammy';
 import i18next from '../lang';
-
+import {logger} from '../helpers/logger';
 import User from '../models/user';
 
 config();
@@ -81,6 +81,7 @@ async function startMessage(ctx: MyContext) {
       });
 
       await newUser.save();
+      logger.info('New user -> ', newUser);
     }
   } catch {}
 
