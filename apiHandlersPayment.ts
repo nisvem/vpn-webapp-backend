@@ -26,7 +26,6 @@ routerPayment.post('/callbackPayment', async (req, res) => {
   i18next.changeLanguage(key.user?.lang || 'en');
 
   logger.info("callbackPayment:", req);
-  logger.info("Key:", key);
 
   try {
     const newDate = key.nextPayment > new Date() ? key.nextPayment : new Date();
