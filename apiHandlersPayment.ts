@@ -25,18 +25,11 @@ routerPayment.post('/callbackPayment', async (req, res) => {
 
   i18next.changeLanguage(key.user?.lang || 'en');
 
-  logger.info("Key:", key);
-
   try {
     const newDate = key.nextPayment > new Date() ? key.nextPayment : new Date();
     key.lastPayment = new Date();
     key.nextPayment = date.addDays(newDate, Number(days), true);
     key.save();
-
-    logger.info("newDate:", newDate);
-    logger.info("days:", Number(days));
-    logger.info("key.nextPayment:", key.nextPayment);
- 
 
     !key.isOpen && (await enableKey(key._id));
     await sendMessage(
