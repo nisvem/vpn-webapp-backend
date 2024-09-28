@@ -28,7 +28,7 @@ routerPayment.post('/callbackPayment', async (req, res) => {
   try {
     const newDate = key.nextPayment > new Date() ? key.nextPayment : new Date();
     key.lastPayment = new Date();
-    key.nextPayment = date.addDays(newDate, days);
+    key.nextPayment = date.addDays(newDate, days, true);
     key.save();
 
     !key.isOpen && (await enableKey(key._id));
