@@ -469,6 +469,8 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
   const telegramId = req.body.telegramId;
   const keyId = req.body.keyId;
   const tariffId = req.body.tariffId;
+  console.log(keyId);
+  console.log(tariffId);
 
   try {
     const key = await Key.findById(keyId).populate('server user').exec();
@@ -478,14 +480,14 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
     if (!tariff) throw new Error("The tariff doesn't exist.");
 
     i18next.changeLanguage(key.user?.lang || 'en');
+    
+    console.log(tariff);
+    console.log(tariff.discountPercentage);
+    const fullTotal =  Number(((key.currentPrice * tariff.days) / 30).toFixed(2));
 
     const total = !tariff.discountPercentage
-      ? ((key.currentPrice * tariff.days) / 30).toFixed(2)
-      : (
-          (((key.currentPrice * tariff.days) / 30) *
-            tariff.discountPercentage) /
-          100
-        ).toFixed(2);
+      ? String(fullTotal)
+      : String((fullTotal - Number((fullTotal * (tariff.discountPercentage/100)).toFixed(2))));
 
     const url = await createPayment(telegramId, key, tariff, total);
 

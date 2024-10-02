@@ -3,7 +3,7 @@ import { Schema, model, Types } from 'mongoose';
 const tariff: Schema = new Schema({
   name: { type: String, required: true },
   days: { type: Number, required: true },
-  discount: { type: Number, required: true },
+  discountPercentage: { type: Number, required: true },
 });
 
 export interface ITariff {
