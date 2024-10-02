@@ -14,6 +14,8 @@ routerPayment.post('/callbackPayment', async (req, res) => {
 
   const { object } = req.body;
   const { keyId, days, telegramId } = object.metadata;
+  const amount = object.amount;
+
   const key = await Key.findById(keyId)
     .populate('user')
     .populate('server')
@@ -45,7 +47,7 @@ routerPayment.post('/callbackPayment', async (req, res) => {
     );
 
     res.status(200).json({ message: 'Success' });
-    logger.info(`New payment from ${key.user.telegramId} for '${key.name}'`)
+    logger.info(`New payment from ${key.user.username?'@' + key.user.username:''} ${key.user.phoneNumber?key.user.phoneNumber:''} (${key.user.telegramId}) for '${key.name} (${days} days${amount.value&&amount.currency?' = ' + amount.value + ' ' + amount.currency :''})'`)
   } catch (error: any) {
     logger.error('Error processing payment callback:', error);
 
