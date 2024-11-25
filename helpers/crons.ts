@@ -50,9 +50,6 @@ async function daleteKey(key: HydratedDocument<IKey>) {
         fingerprint: server.FINGERPRINT,
       });
       await outlinevpn.deleteUser(key.id);
-      await checkOpenToRegister(user, server);
-
-
     } catch {
       logger.error(`The server doesn't exist -> ${server.URL}`);
     }
@@ -63,6 +60,8 @@ async function daleteKey(key: HydratedDocument<IKey>) {
     await Key.findByIdAndDelete(key._id);
     await user.save();
     await server.save();
+
+    await checkOpenToRegister(user, server);
 
     logger.info(`Key ${key.name} of ${key.user.telegramId} deleted`);
   } catch (error: any) {
