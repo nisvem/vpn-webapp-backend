@@ -29,12 +29,14 @@ async function disableKey(key: HydratedDocument<IKey>) {
     logger.info(`Key ${key.name} of ${key.user.telegramId} disabled`);
     await key.save();
   } catch (error: any) {
-    logger.error(`KeyID: ${key.id}, Function: disableKey(), Error: ${error.message} `);
+    logger.error(
+      `KeyID: ${key.id}, Function: disableKey(), Error: ${error.message} `
+    );
     throw new Error(error.message);
   }
 }
 
-async function daleteKey(key: HydratedDocument<IKey>) {
+async function deleteKey(key: HydratedDocument<IKey>) {
   try {
     const user = await User.findById(key.user._id).populate('keys').exec();
     const server = await Server.findById(key.server._id)
@@ -65,7 +67,9 @@ async function daleteKey(key: HydratedDocument<IKey>) {
 
     logger.info(`Key ${key.name} of ${key.user.telegramId} deleted`);
   } catch (error: any) {
-    logger.error(`KeyID: ${key.id}, Function: daleteKey(), Error: ${error.message} `);
+    logger.error(
+      `KeyID: ${key.id}, Function: deleteKey(), Error: ${error.message} `
+    );
     throw new Error(error.message);
   }
 }
@@ -133,6 +137,7 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
     ? date.isSameDay(key.lastNotification, new Date())
     : false;
 
+  // Уведомление: ключ истекает завтра
   if (
     daysUntilExpiration === 1 &&
     key.status === 'active' &&
@@ -146,33 +151,36 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
       }),
       keysKeyboard
     );
+
     key.status = 'expiresTomorrow';
     key.lastNotification = new Date();
 
     await key.save();
-  } else if (
-    (daysUntilExpiration < 0 &&
-      key.status === 'expiresTomorrow' &&
-      !alreadyNotifiedToday) ||
-    (daysUntilExpiration === 0 &&
-      key.status === 'active' &&
-      !alreadyNotifiedToday)
+    return;
+  }
+
+  // Удаление ключа: истек 3 дня назад или ранее
+  if (
+    daysUntilExpiration < -3 &&
+    key.status === 'willBeDeletedTomorrow' &&
+    !alreadyNotifiedToday
   ) {
-    await disableKey(key);
+    await deleteKey(key);
     await sendMessage(
       key.user.telegramId,
-      i18next.t('key_expired', {
+      i18next.t('key_expired_and_delete', {
         name: key.name,
         date: date.format(key.nextPayment, 'DD/MM/YYYY'),
       }),
       keysKeyboard
     );
-    key.status = 'expired';
-    key.lastNotification = new Date();
 
-    await key.save();
-  } else if (
-    daysUntilExpiration === -2 &&
+    return;
+  }
+
+  // Уведомление: ключ истек и будет удален завтра
+  if (
+    daysUntilExpiration <= -2 &&
     key.status === 'expired' &&
     !alreadyNotifiedToday
   ) {
@@ -184,39 +192,38 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
       }),
       keysKeyboard
     );
+
     key.status = 'willBeDeletedTomorrow';
     key.lastNotification = new Date();
 
     await key.save();
-  } else if (
-    daysUntilExpiration === -3 &&
-    key.status === 'willBeDeletedTomorrow' &&
-    !alreadyNotifiedToday
-  ) {
-    await daleteKey(key);
+    return;
+  }
+
+  // Деактивация ключа: истек
+  if (daysUntilExpiration <= 0 && (!key.status || key.status === 'expiresTomorrow' || key.status==='active') && !alreadyNotifiedToday) {
+    await disableKey(key);
     await sendMessage(
       key.user.telegramId,
-      i18next.t('key_expired_and_delete', {
+      i18next.t('key_expired', {
         name: key.name,
         date: date.format(key.nextPayment, 'DD/MM/YYYY'),
       }),
       keysKeyboard
     );
-  } else if (
-    daysUntilExpiration < -3 &&
-    key.status === 'expired' &&
-    !alreadyNotifiedToday
-  ) {
-    await daleteKey(key);
-    await sendMessage(
-      key.user.telegramId,
-      i18next.t('key_expired_and_delete', {
-        name: key.name,
-        date: date.format(key.nextPayment, 'DD/MM/YYYY'),
-      }),
-      keysKeyboard
-    );
+
+    key.status = 'expired';
+    key.lastNotification = new Date();
+
+    await key.save();
   }
 }
+
+// active
+// expiresTomorrow
+// expired
+// willBeDeletedTomorrow
+
+// none -
 
 export default startCron;
