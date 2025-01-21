@@ -151,7 +151,7 @@ async function checkExpiredKeys(key: HydratedDocument<IKey>) {
 
     await key.save();
   } else if (
-    (daysUntilExpiration === 0 &&
+    (daysUntilExpiration < 0 &&
       key.status === 'expiresTomorrow' &&
       !alreadyNotifiedToday) ||
     (daysUntilExpiration === 0 &&
