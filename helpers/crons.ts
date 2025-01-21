@@ -76,7 +76,7 @@ async function deleteKey(key: HydratedDocument<IKey>) {
 
 async function startCron() {
   new cron.CronJob(
-    '38 * * * *',
+    '*/10 * * * *',
     async () => {
       try {
         logger.debug(`Cron started`);
