@@ -56,8 +56,8 @@ async function deleteKey(key: HydratedDocument<IKey>) {
       logger.error(`The server doesn't exist -> ${server.URL}`);
     }
 
-    user.keys = user.keys.filter((item) => key._id != item._id);
-    server.keys = server.keys.filter((item) => key._id != item._id);
+    user.keys = user.keys.filter((item) => !key._id.equals(item._id));
+    server.keys = server.keys.filter((item) => !key._id.equals(item._id));
 
     await Key.findByIdAndDelete(key._id);
     await user.save();
