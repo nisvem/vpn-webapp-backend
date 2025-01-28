@@ -381,6 +381,7 @@ routerApp.post(
       });
 
       user.keys.push(key);
+      user.isLimitedToCreate = user.keys.length >= user.maxKeyAvalible;
       server.keys.push(key);
 
       await key.save();
@@ -437,6 +438,7 @@ routerApp.post('/deleteKey', checkAccess, async (req, res) => {
     }
 
     user.keys = user.keys.filter((key) => key._id != keyId);
+    user.isLimitedToCreate = user.keys.length >= user.maxKeyAvalible;
     server.keys = server.keys.filter((key) => key._id != keyId);
 
     await Key.findByIdAndDelete(keyId);

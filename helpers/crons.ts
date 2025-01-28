@@ -58,6 +58,7 @@ async function deleteKey(key: HydratedDocument<IKey>) {
 
     user.keys = user.keys.filter((item) => !key._id.equals(item._id));
     server.keys = server.keys.filter((item) => !key._id.equals(item._id));
+    user.isLimitedToCreate = user.keys.length >= user.maxKeyAvalible;
 
     await Key.findByIdAndDelete(key._id);
     await user.save();
