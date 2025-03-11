@@ -510,7 +510,7 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
       'XTR', // Stars Currency
       [
         {
-          amount: 1 || total,
+          amount: total,
           label: `Key "${key.name}" (${key.server.name}) for ${tariff.days} days`,
         },
       ]
