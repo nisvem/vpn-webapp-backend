@@ -5,7 +5,7 @@ import {logger} from './helpers/logger';
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
 
 import Key from './models/key';
-import i18next from './lang/';
+import i18next from './lang';
 
 const routerPayment = Router();
 

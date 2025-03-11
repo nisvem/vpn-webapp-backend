@@ -7,7 +7,6 @@ import cors from 'cors';
 
 import { bot } from './bot/bot';
 import apiHandlersApp from './apiHandlersApp';
-import apiHandlersPayment from './apiHandlersPayment';
 import startCron from './helpers/crons';
 import {logger} from './helpers/logger';
 
@@ -18,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api', apiHandlersApp);
-app.use('/payment', apiHandlersPayment);
+// app.use('/payment', apiHandlersPayment);
 
 const start = async () => {
   try {
@@ -39,7 +38,7 @@ const start = async () => {
         logger.debug(`App server started on port ${process.env.PORT}`);
       });
       bot.start();
-      await startCron();
+      // await startCron();
     } else {
       app.listen(process.env.PORT || 3000, () => {
         logger.debug(`App server started on port ${process.env.PORT}`);

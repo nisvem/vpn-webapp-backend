@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { OutlineVPN } from 'outlinevpn-api';
+import { bot } from './bot/bot';
 import {
   isHaveAccess,
   checkOpenToRegister,
@@ -11,7 +12,7 @@ import {
   checkAccessApp,
   dataLimitWhenDisable,
   findAvailablePort,
-  sendMessage
+  sendMessage,
 } from './helpers/helpers.js';
 
 import getUnicodeFlagIcon from 'country-flag-icons/unicode';
@@ -22,7 +23,7 @@ import Server from './models/server';
 import Tariff from './models/tariff';
 import mongoose, { Error } from 'mongoose';
 import { createPayment } from './helpers/payment';
-import {logger} from './helpers/logger';
+import { logger } from './helpers/logger';
 import i18next from './lang';
 
 const routerApp = Router();
@@ -146,7 +147,9 @@ routerApp.get('/getServers', checkAccess, async (req, res) => {
       res.json(servers);
     } else {
       res.status(500).json({ error: 'No free servers available' });
-      logger.error('apiHandlersApp -> /getServers -> No free servers available');
+      logger.error(
+        'apiHandlersApp -> /getServers -> No free servers available'
+      );
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -482,44 +485,74 @@ routerApp.post('/getUrlPaymentToChat', checkAccess, async (req, res) => {
     if (!tariff) throw new Error("The tariff doesn't exist.");
 
     i18next.changeLanguage(key.user?.lang || 'en');
-    
-    console.log(tariff);
-    console.log(tariff.discountPercentage);
-    const fullTotal =  Number(((key.currentPrice * tariff.days) / 30).toFixed(2));
+
+    const fullTotal = Number(
+      ((key.currentPrice * tariff.days) / 30).toFixed(0)
+    );
 
     const total = !tariff.discountPercentage
-      ? String(fullTotal)
-      : String((fullTotal - Number((fullTotal * (tariff.discountPercentage/100)).toFixed(2))));
+      ? fullTotal
+      : fullTotal -
+        Number((fullTotal * (tariff.discountPercentage / 100)).toFixed(0));
 
-    const url = await createPayment(telegramId, key, tariff, total);
-
-    if (url)
-      await sendMessage(
-        telegramId,
-        i18next.t('message_for_payment', {
-          name: key.name,
-          server: `${key.server.name} (${
-            key.server.country
-          } ${getUnicodeFlagIcon(key.server.abbreviatedCountry)})`,
-          days: tariff.days,
-          total: total,
-        }),
+    const {message_id} = await bot.api.sendInvoice(
+      telegramId,
+      `Key "${key.name}" (${key.server.name}) for ${tariff.days} days`, // Product title
+      i18next.t('description_payment', {
+        name: key.name,
+        server: `${key.server.name} (${key.server.country} ${getUnicodeFlagIcon(
+          key.server.abbreviatedCountry
+        )})`,
+        days: tariff.days,
+        total: total,
+      }), // Product description
+      JSON.stringify({ telegramId, keyId, tariffId }), // Product payload, not required for now
+      'XTR', // Stars Currency
+      [
         {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: i18next.t('pay'),
-                  url: url,
-                },
-              ],
-            ],
-          },
-          parse_mode: 'HTML',
-        }
-      );
+          amount: 1 || total,
+          label: `Key "${key.name}" (${key.server.name}) for ${tariff.days} days`,
+        },
+      ]
+    );
+
+    const user = await User.findById(key.user._id).exec();
+
+    if(!user) return;
+
+    user.paymentMessagesId.push(message_id);
+    user.save();
 
     res.status(200).json();
+    // const url = await createPayment(telegramId, key, tariff, total);
+
+    //   if (url)
+    //     await sendMessage(
+    //       telegramId,
+    //       i18next.t('message_for_payment', {
+    //         name: key.name,
+    //         server: `${key.server.name} (${
+    //           key.server.country
+    //         } ${getUnicodeFlagIcon(key.server.abbreviatedCountry)})`,
+    //         days: tariff.days,
+    //         total: total,
+    //       }),
+    //       {
+    //         reply_markup: {
+    //           inline_keyboard: [
+    //             [
+    //               {
+    //                 text: i18next.t('pay'),
+    //                 url: url,
+    //               },
+    //             ],
+    //           ],
+    //         },
+    //         parse_mode: 'HTML',
+    //       }
+    //     );
+
+    //   res.status(200).json();
   } catch (error: any) {
     await sendMessage(telegramId, i18next.t('error'));
     res.status(500).json({ error: error.message });

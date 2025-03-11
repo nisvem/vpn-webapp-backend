@@ -19,6 +19,7 @@ const user: Schema = new Schema({
   dateOfCreateUser: { type: Date, required: false },
 
   keys: [{ type: Schema.Types.ObjectId, ref: 'key' }],
+  paymentMessagesId: [{type: Number, required: false}]
 });
 
 export interface IUser {
@@ -40,6 +41,7 @@ export interface IUser {
   dateOfCreateUser: Date;
 
   keys: IKey[];
+  paymentMessagesId: number[];
 }
 
 export default model<IUser>('user', user);
